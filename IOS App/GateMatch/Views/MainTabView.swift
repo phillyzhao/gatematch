@@ -23,12 +23,7 @@ struct MainTabView: View {
             .tag(Tab.nearby)
 
             NavigationStack {
-                ContentUnavailableView(
-                    "No matches yet",
-                    systemImage: "heart",
-                    description: Text("When you and another traveler like each other, they show up here.")
-                )
-                .navigationTitle("Matches")
+                MatchesView()
             }
             .tabItem { Label("Matches", systemImage: "heart.fill") }
             .tag(Tab.matches)

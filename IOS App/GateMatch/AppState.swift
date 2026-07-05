@@ -79,8 +79,20 @@ final class AppState {
         guard incomingLikes.contains(traveler.id) else { return nil }
         let match = Match(travelerID: traveler.id)
         matches.append(match)
+        messages[match.id] = [MockData.greeting(from: traveler, matchID: match.id)]
         pendingMatchCelebration = match
         return match
+    }
+
+    // MARK: Chat
+
+    func send(_ text: String, in match: Match) {
+        guard let currentUser else { return }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        messages[match.id, default: []].append(
+            ChatMessage(matchID: match.id, senderID: currentUser.id, text: trimmed)
+        )
     }
 
     func pass(_ traveler: UserProfile) {
@@ -98,6 +110,11 @@ final class AppState {
             gate: "B12",
             flightTime: .now.addingTimeInterval(90 * 60)
         )
+        // One existing match with a greeting so Matches/Chat previews have content.
+        if let maya = state.travelers.first {
+            state.like(maya)
+            state.pendingMatchCelebration = nil
+        }
         return state
     }
 }

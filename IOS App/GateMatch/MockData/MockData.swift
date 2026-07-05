@@ -95,6 +95,18 @@ enum MockData {
     /// liking them back creates an instant match.
     static let incomingLikes: Set<UUID> = [uuid(1), uuid(3), uuid(6)]
 
+    /// Opening line a mock traveler "sends" right after matching.
+    static func greeting(from traveler: UserProfile, matchID: UUID) -> ChatMessage {
+        let lines = [
+            "Hey! Looks like we're both stuck here for a bit 👋",
+            "Hi! How long until your flight boards?",
+            "Hey — up for a coffee near the gate?",
+            "Hi there! Where are you headed?",
+        ]
+        let index = traveler.id.uuidString.unicodeScalars.reduce(0) { $0 + Int($1.value) } % lines.count
+        return ChatMessage(matchID: matchID, senderID: traveler.id, text: lines[index])
+    }
+
     /// A sample "you" for SwiftUI previews.
     static let previewUser = UserProfile(
         id: uuid(100), firstName: "Alex", age: 30, travelPurpose: .business,

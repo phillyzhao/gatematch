@@ -1,6 +1,6 @@
 import Foundation
 
-struct Match: Identifiable, Codable, Equatable {
+struct Match: Identifiable, Codable, Equatable, Hashable {
     let id: UUID
     /// The other traveler in the match (the current user is implicit).
     let travelerID: UUID
