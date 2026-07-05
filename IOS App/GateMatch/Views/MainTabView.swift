@@ -7,7 +7,7 @@ struct MainTabView: View {
         TabView {
             NavigationStack {
                 if appState.isCheckedIn {
-                    checkedInPlaceholder
+                    TravelerFeedView()
                 } else {
                     AirportCheckInView()
                 }
@@ -37,15 +37,6 @@ struct MainTabView: View {
         .tint(Theme.brand)
     }
 
-    // Temporary landing spot until the traveler feed arrives.
-    private var checkedInPlaceholder: some View {
-        ContentUnavailableView(
-            "Checked in at \(appState.checkIn?.airportCode ?? "")",
-            systemImage: "checkmark.circle",
-            description: Text("The traveler feed is coming next.")
-        )
-        .navigationTitle("Nearby")
-    }
 }
 
 #Preview("Needs check-in") {
