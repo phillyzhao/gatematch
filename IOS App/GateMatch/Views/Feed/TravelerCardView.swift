@@ -12,28 +12,35 @@ struct TravelerCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                AvatarView(profile: traveler)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("\(traveler.firstName), \(traveler.age)")
-                        .font(.headline)
-                    Label(traveler.travelPurpose.rawValue, systemImage: traveler.travelPurpose.symbolName)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            NavigationLink(value: traveler) {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 12) {
+                        AvatarView(profile: traveler)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("\(traveler.firstName), \(traveler.age)")
+                                .font(.headline)
+                            Label(traveler.travelPurpose.rawValue, systemImage: traveler.travelPurpose.symbolName)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        proximityChip
+                    }
+
+                    Text(traveler.bio)
+                        .font(.subheadline)
+                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
+
+                    if let locationLine {
+                        Label(locationLine, systemImage: "mappin.and.ellipse")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                Spacer()
-                proximityChip
+                .contentShape(Rectangle())
             }
-
-            Text(traveler.bio)
-                .font(.subheadline)
-                .lineLimit(3)
-
-            if let locationLine {
-                Label(locationLine, systemImage: "mappin.and.ellipse")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            .buttonStyle(.plain)
 
             HStack(spacing: 12) {
                 Button(action: onPass) {

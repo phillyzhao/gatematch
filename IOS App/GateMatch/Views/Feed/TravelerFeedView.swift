@@ -17,6 +17,9 @@ struct TravelerFeedView: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Nearby")
+        .navigationDestination(for: UserProfile.self) { traveler in
+            ProfileDetailView(traveler: traveler)
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Change") {

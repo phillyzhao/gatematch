@@ -20,7 +20,7 @@ enum TravelPurpose: String, Codable, CaseIterable, Identifiable {
     }
 }
 
-struct UserProfile: Identifiable, Codable, Equatable {
+struct UserProfile: Identifiable, Codable, Equatable, Hashable {
     let id: UUID
     var firstName: String
     var age: Int
