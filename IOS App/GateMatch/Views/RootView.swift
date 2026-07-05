@@ -1,19 +1,26 @@
 import SwiftUI
 
 struct RootView: View {
+    @Environment(AppState.self) private var appState
+
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "airplane.departure")
-                .font(.system(size: 44))
-                .foregroundStyle(.tint)
-            Text("GateMatch")
-                .font(.largeTitle.bold())
-            Text("Meet travelers at your gate")
-                .foregroundStyle(.secondary)
+        Group {
+            if appState.hasOnboarded {
+                MainTabView()
+            } else {
+                OnboardingView()
+            }
         }
+        .animation(.easeInOut(duration: 0.25), value: appState.hasOnboarded)
     }
 }
 
-#Preview {
+#Preview("Onboarding") {
     RootView()
+        .environment(AppState())
+}
+
+#Preview("Onboarded") {
+    RootView()
+        .environment(AppState.preview)
 }
