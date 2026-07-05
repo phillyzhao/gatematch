@@ -29,12 +29,7 @@ struct MainTabView: View {
             .tag(Tab.matches)
 
             NavigationStack {
-                ContentUnavailableView(
-                    "Settings coming soon",
-                    systemImage: "gearshape",
-                    description: Text("Profile, safety, and privacy controls will live here.")
-                )
-                .navigationTitle("Settings")
+                SettingsView()
             }
             .tabItem { Label("Settings", systemImage: "gearshape.fill") }
             .tag(Tab.settings)
