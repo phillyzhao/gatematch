@@ -1,15 +1,16 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @Environment(AppState.self) private var appState
+
     var body: some View {
         TabView {
             NavigationStack {
-                ContentUnavailableView(
-                    "Airport check-in coming next",
-                    systemImage: "airplane",
-                    description: Text("Check in to your airport to see travelers nearby.")
-                )
-                .navigationTitle("Nearby")
+                if appState.isCheckedIn {
+                    checkedInPlaceholder
+                } else {
+                    AirportCheckInView()
+                }
             }
             .tabItem { Label("Nearby", systemImage: "person.2.fill") }
 
@@ -35,9 +36,28 @@ struct MainTabView: View {
         }
         .tint(Theme.brand)
     }
+
+    // Temporary landing spot until the traveler feed arrives.
+    private var checkedInPlaceholder: some View {
+        ContentUnavailableView(
+            "Checked in at \(appState.checkIn?.airportCode ?? "")",
+            systemImage: "checkmark.circle",
+            description: Text("The traveler feed is coming next.")
+        )
+        .navigationTitle("Nearby")
+    }
 }
 
-#Preview {
+#Preview("Needs check-in") {
+    MainTabView()
+        .environment({
+            let state = AppState()
+            state.currentUser = MockData.previewUser
+            return state
+        }())
+}
+
+#Preview("Checked in") {
     MainTabView()
         .environment(AppState.preview)
 }
