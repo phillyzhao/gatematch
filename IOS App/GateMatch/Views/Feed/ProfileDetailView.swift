@@ -154,7 +154,9 @@ struct ProfileDetailView: View {
             .buttonStyle(.plain)
 
             Button {
-                withAnimation(.snappy) { appState.like(traveler) }
+                withAnimation(.snappy) {
+                    _ = appState.like(traveler)
+                }
                 dismiss()
             } label: {
                 Label("Like", systemImage: "heart.fill")

@@ -23,6 +23,8 @@ final class AppState {
     /// Chat threads keyed by match ID.
     var messages: [UUID: [ChatMessage]] = [:]
     var blockedIDs: Set<UUID> = []
+    /// Set when a mutual like just happened; drives the "It's a match" sheet.
+    var pendingMatchCelebration: Match?
 
     var hasOnboarded: Bool { currentUser != nil }
     var isCheckedIn: Bool { checkIn != nil }
@@ -70,8 +72,15 @@ final class AppState {
         return 2
     }
 
-    func like(_ traveler: UserProfile) {
+    /// Records a like. If the traveler already liked the user (mock), it's a match.
+    @discardableResult
+    func like(_ traveler: UserProfile) -> Match? {
         likedIDs.insert(traveler.id)
+        guard incomingLikes.contains(traveler.id) else { return nil }
+        let match = Match(travelerID: traveler.id)
+        matches.append(match)
+        pendingMatchCelebration = match
+        return match
     }
 
     func pass(_ traveler: UserProfile) {

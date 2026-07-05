@@ -41,10 +41,14 @@ struct TravelerFeedView: View {
                         sameTerminal: appState.proximityRank(of: traveler) <= 1,
                         sameGate: appState.proximityRank(of: traveler) == 0,
                         onLike: {
-                            withAnimation(.snappy) { appState.like(traveler) }
+                            withAnimation(.snappy) {
+                                _ = appState.like(traveler)
+                            }
                         },
                         onPass: {
-                            withAnimation(.snappy) { appState.pass(traveler) }
+                            withAnimation(.snappy) {
+                                appState.pass(traveler)
+                            }
                         }
                     )
                 }
