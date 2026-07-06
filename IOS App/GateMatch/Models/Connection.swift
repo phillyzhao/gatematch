@@ -1,8 +1,9 @@
 import Foundation
 
-struct Match: Identifiable, Codable, Equatable, Hashable {
+/// A mutual "want to meet" between the current user and another attendee.
+struct Connection: Identifiable, Codable, Equatable, Hashable {
     let id: UUID
-    /// The other traveler in the match (the current user is implicit).
+    /// The other traveler in the connection (the current user is implicit).
     let travelerID: UUID
     let createdAt: Date
 

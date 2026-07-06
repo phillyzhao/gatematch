@@ -91,9 +91,9 @@ enum MockData {
         return result
     }()
 
-    /// Mock travelers who have already liked the current user —
-    /// liking them back creates an instant match.
-    static let incomingLikes: Set<UUID> = [uuid(1), uuid(3), uuid(6)]
+    /// Mock travelers who already asked to meet the current user —
+    /// connecting with them back creates an instant connection.
+    static let incomingRequests: Set<UUID> = [uuid(1), uuid(3), uuid(6)]
 
     /// Official business events preloaded in the app. All fictional.
     static let events: [Event] = [
@@ -154,8 +154,8 @@ enum MockData {
         uuid(10): uuid(204), // Marcus
     ]
 
-    /// Opening line a mock traveler "sends" right after matching.
-    static func greeting(from traveler: UserProfile, matchID: UUID) -> ChatMessage {
+    /// Opening line a mock traveler "sends" right after connecting.
+    static func greeting(from traveler: UserProfile, connectionID: UUID) -> ChatMessage {
         let lines = [
             "Hey! Looks like we're both stuck here for a bit 👋",
             "Hi! How long until your flight boards?",
@@ -163,7 +163,7 @@ enum MockData {
             "Hi there! Where are you headed?",
         ]
         let index = traveler.id.uuidString.unicodeScalars.reduce(0) { $0 + Int($1.value) } % lines.count
-        return ChatMessage(matchID: matchID, senderID: traveler.id, text: lines[index])
+        return ChatMessage(connectionID: connectionID, senderID: traveler.id, text: lines[index])
     }
 
     /// A sample "you" for SwiftUI previews.

@@ -8,7 +8,7 @@ struct ProfileDetailView: View {
     @State private var showBlockConfirm = false
     @State private var showReportConfirmation = false
 
-    /// Like/Pass only make sense while the traveler is still in the feed.
+    /// Connect/Skip only make sense while the traveler is still in the feed.
     private var isActionable: Bool {
         appState.eventTravelers.contains(traveler)
     }
@@ -141,10 +141,10 @@ struct ProfileDetailView: View {
     private var actionBar: some View {
         HStack(spacing: 12) {
             Button {
-                withAnimation(.snappy) { appState.pass(traveler) }
+                withAnimation(.snappy) { appState.skip(traveler) }
                 dismiss()
             } label: {
-                Label("Pass", systemImage: "xmark")
+                Label("Skip", systemImage: "xmark")
                     .font(.subheadline.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
@@ -155,11 +155,11 @@ struct ProfileDetailView: View {
 
             Button {
                 withAnimation(.snappy) {
-                    _ = appState.like(traveler)
+                    _ = appState.connect(with: traveler)
                 }
                 dismiss()
             } label: {
-                Label("Like", systemImage: "heart.fill")
+                Label("Connect", systemImage: "person.badge.plus")
                     .font(.subheadline.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)

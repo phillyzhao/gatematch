@@ -29,18 +29,18 @@ final class AppState {
     let events: [Event]
     /// Which event each mock traveler is attending.
     let travelerEventIDs: [UUID: UUID]
-    /// Travelers who have already "liked" the current user (mock).
-    let incomingLikes: Set<UUID>
+    /// Travelers who already asked to meet the current user (mock).
+    let incomingRequests: Set<UUID>
 
     // MARK: Interactions
-    var likedIDs: Set<UUID> = []
-    var passedIDs: Set<UUID> = []
-    var matches: [Match] = []
-    /// Chat threads keyed by match ID.
+    var requestedIDs: Set<UUID> = []
+    var skippedIDs: Set<UUID> = []
+    var connections: [Connection] = []
+    /// Chat threads keyed by connection ID.
     var messages: [UUID: [ChatMessage]] = [:]
     var blockedIDs: Set<UUID> = []
-    /// Set when a mutual like just happened; drives the "It's a match" sheet.
-    var pendingMatchCelebration: Match?
+    /// Set when a mutual connect just happened; drives the "You're connected" sheet.
+    var pendingCelebration: Connection?
 
     var hasOnboarded: Bool { currentUser != nil }
     var hasJoinedEvent: Bool { joinedEvent != nil }
@@ -51,13 +51,13 @@ final class AppState {
         travelerCheckIns: [UUID: AirportCheckIn] = MockData.travelerCheckIns,
         events: [Event] = MockData.events,
         travelerEventIDs: [UUID: UUID] = MockData.travelerEventIDs,
-        incomingLikes: Set<UUID> = MockData.incomingLikes
+        incomingRequests: Set<UUID> = MockData.incomingRequests
     ) {
         self.travelers = travelers
         self.travelerCheckIns = travelerCheckIns
         self.events = events
         self.travelerEventIDs = travelerEventIDs
-        self.incomingLikes = incomingLikes
+        self.incomingRequests = incomingRequests
     }
 
     func traveler(withID id: UUID) -> UserProfile? {
@@ -86,8 +86,8 @@ final class AppState {
             .filter { traveler in
                 traveler.id != currentUser?.id
                     && travelerEventIDs[traveler.id] == joinedEvent.id
-                    && !likedIDs.contains(traveler.id)
-                    && !passedIDs.contains(traveler.id)
+                    && !requestedIDs.contains(traveler.id)
+                    && !skippedIDs.contains(traveler.id)
                     && !blockedIDs.contains(traveler.id)
             }
             .sorted {
@@ -108,34 +108,34 @@ final class AppState {
         return .sameAirport
     }
 
-    /// Records a like. If the traveler already liked the user (mock), it's a match.
+    /// Asks to meet a traveler. If they already asked too (mock), you're connected.
     @discardableResult
-    func like(_ traveler: UserProfile) -> Match? {
-        likedIDs.insert(traveler.id)
-        guard incomingLikes.contains(traveler.id) else { return nil }
-        let match = Match(travelerID: traveler.id)
-        matches.append(match)
-        messages[match.id] = [MockData.greeting(from: traveler, matchID: match.id)]
-        pendingMatchCelebration = match
-        return match
+    func connect(with traveler: UserProfile) -> Connection? {
+        requestedIDs.insert(traveler.id)
+        guard incomingRequests.contains(traveler.id) else { return nil }
+        let connection = Connection(travelerID: traveler.id)
+        connections.append(connection)
+        messages[connection.id] = [MockData.greeting(from: traveler, connectionID: connection.id)]
+        pendingCelebration = connection
+        return connection
+    }
+
+    func skip(_ traveler: UserProfile) {
+        skippedIDs.insert(traveler.id)
     }
 
     // MARK: Chat
 
-    func send(_ text: String, in match: Match) {
+    func send(_ text: String, in connection: Connection) {
         guard let currentUser else { return }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        messages[match.id, default: []].append(
-            ChatMessage(matchID: match.id, senderID: currentUser.id, text: trimmed)
+        messages[connection.id, default: []].append(
+            ChatMessage(connectionID: connection.id, senderID: currentUser.id, text: trimmed)
         )
     }
 
-    func pass(_ traveler: UserProfile) {
-        passedIDs.insert(traveler.id)
-    }
-
-    /// Fully set-up state for SwiftUI previews: onboarded and checked in at ORD.
+    /// Fully set-up state for SwiftUI previews: onboarded, event joined, checked in at ORD.
     static var preview: AppState {
         let state = AppState()
         state.currentUser = MockData.previewUser
@@ -147,10 +147,10 @@ final class AppState {
             gate: "B12",
             flightTime: .now.addingTimeInterval(90 * 60)
         )
-        // One existing match with a greeting so Matches/Chat previews have content.
+        // One existing connection with a greeting so Connections/Chat previews have content.
         if let maya = state.travelers.first {
-            state.like(maya)
-            state.pendingMatchCelebration = nil
+            state.connect(with: maya)
+            state.pendingCelebration = nil
         }
         return state
     }

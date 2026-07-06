@@ -2,16 +2,16 @@ import SwiftUI
 
 struct ChatView: View {
     @Environment(AppState.self) private var appState
-    let match: Match
+    let connection: Connection
 
     @State private var draft = ""
 
     private var thread: [ChatMessage] {
-        appState.messages[match.id] ?? []
+        appState.messages[connection.id] ?? []
     }
 
     private var traveler: UserProfile? {
-        appState.traveler(withID: match.travelerID)
+        appState.traveler(withID: connection.travelerID)
     }
 
     private var canSend: Bool {
@@ -76,7 +76,7 @@ struct ChatView: View {
     }
 
     private func send() {
-        appState.send(draft, in: match)
+        appState.send(draft, in: connection)
         draft = ""
     }
 }
@@ -105,8 +105,8 @@ private struct MessageBubble: View {
 
 #Preview {
     NavigationStack {
-        if let match = AppState.preview.matches.first {
-            ChatView(match: match)
+        if let connection = AppState.preview.connections.first {
+            ChatView(connection: connection)
         }
     }
     .environment(AppState.preview)

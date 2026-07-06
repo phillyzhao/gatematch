@@ -1,12 +1,12 @@
 import SwiftUI
 
-/// Shown the moment a mutual like happens.
+/// Shown the moment a mutual connect happens.
 /// Flat brand blue, no shadows or glows — the color carries the moment.
-struct MatchCelebrationView: View {
+struct ConnectionCelebrationView: View {
     let currentUser: UserProfile
     let traveler: UserProfile
-    /// Called with `true` if the user wants to jump to Matches.
-    let onFinish: (_ openMatches: Bool) -> Void
+    /// Called with `true` if the user wants to jump to Connections.
+    let onFinish: (_ openConnections: Bool) -> Void
 
     var body: some View {
         VStack(spacing: 28) {
@@ -18,9 +18,9 @@ struct MatchCelebrationView: View {
             }
 
             VStack(spacing: 8) {
-                Text("It's a match!")
+                Text("You're connected!")
                     .font(.largeTitle.bold())
-                Text("You and \(traveler.firstName) liked each other. Say hi before boarding.")
+                Text("You and \(traveler.firstName) both want to meet. Say hi before boarding.")
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .opacity(0.85)
@@ -32,7 +32,7 @@ struct MatchCelebrationView: View {
                 Button {
                     onFinish(true)
                 } label: {
-                    Text("Open Matches")
+                    Text("Open Connections")
                         .font(.headline)
                         .foregroundStyle(Theme.brand)
                         .frame(maxWidth: .infinity)
@@ -54,7 +54,6 @@ struct MatchCelebrationView: View {
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.brand)
-        .interactiveDismissDisabled(false)
     }
 
     private func avatarWithRing(_ profile: UserProfile) -> some View {
@@ -64,7 +63,7 @@ struct MatchCelebrationView: View {
 }
 
 #Preview {
-    MatchCelebrationView(
+    ConnectionCelebrationView(
         currentUser: MockData.previewUser,
         traveler: MockData.travelers[0],
         onFinish: { _ in }

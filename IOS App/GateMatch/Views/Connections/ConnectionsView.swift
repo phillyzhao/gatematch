@@ -1,46 +1,46 @@
 import SwiftUI
 
-struct MatchesView: View {
+struct ConnectionsView: View {
     @Environment(AppState.self) private var appState
 
-    private var visibleMatches: [Match] {
-        appState.matches
+    private var visibleConnections: [Connection] {
+        appState.connections
             .filter { !appState.blockedIDs.contains($0.travelerID) }
             .sorted { $0.createdAt > $1.createdAt }
     }
 
     var body: some View {
         Group {
-            if visibleMatches.isEmpty {
+            if visibleConnections.isEmpty {
                 ContentUnavailableView(
-                    "No matches yet",
-                    systemImage: "heart",
-                    description: Text("When you and another traveler like each other, they show up here.")
+                    "No connections yet",
+                    systemImage: "person.line.dotted.person",
+                    description: Text("When you and another attendee both want to meet, they show up here.")
                 )
             } else {
-                List(visibleMatches) { match in
-                    if let traveler = appState.traveler(withID: match.travelerID) {
-                        NavigationLink(value: match) {
-                            matchRow(match: match, traveler: traveler)
+                List(visibleConnections) { connection in
+                    if let traveler = appState.traveler(withID: connection.travelerID) {
+                        NavigationLink(value: connection) {
+                            connectionRow(connection: connection, traveler: traveler)
                         }
                     }
                 }
                 .listStyle(.insetGrouped)
             }
         }
-        .navigationTitle("Matches")
-        .navigationDestination(for: Match.self) { match in
-            ChatView(match: match)
+        .navigationTitle("Connections")
+        .navigationDestination(for: Connection.self) { connection in
+            ChatView(connection: connection)
         }
     }
 
-    private func matchRow(match: Match, traveler: UserProfile) -> some View {
+    private func connectionRow(connection: Connection, traveler: UserProfile) -> some View {
         HStack(spacing: 12) {
             AvatarView(profile: traveler, size: 48)
             VStack(alignment: .leading, spacing: 3) {
                 Text(traveler.firstName)
                     .font(.headline)
-                if let lastMessage = appState.messages[match.id]?.last {
+                if let lastMessage = appState.messages[connection.id]?.last {
                     Text(lastMessage.text)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -48,7 +48,7 @@ struct MatchesView: View {
                 }
             }
             Spacer()
-            Text(match.createdAt.formatted(date: .omitted, time: .shortened))
+            Text(connection.createdAt.formatted(date: .omitted, time: .shortened))
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
@@ -58,7 +58,7 @@ struct MatchesView: View {
 
 #Preview {
     NavigationStack {
-        MatchesView()
+        ConnectionsView()
     }
     .environment(AppState.preview)
 }

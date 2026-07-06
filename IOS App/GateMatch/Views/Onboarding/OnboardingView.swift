@@ -115,7 +115,7 @@ struct OnboardingView: View {
 
     private var continueButton: some View {
         Button(action: completeOnboarding) {
-            Text("Start matching")
+            Text("Continue")
                 .font(.headline)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)

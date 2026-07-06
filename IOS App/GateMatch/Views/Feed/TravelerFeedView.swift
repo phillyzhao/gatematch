@@ -16,7 +16,7 @@ struct TravelerFeedView: View {
             }
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Nearby")
+        .navigationTitle("Travelers")
         .navigationDestination(for: UserProfile.self) { traveler in
             ProfileDetailView(traveler: traveler)
         }
@@ -39,14 +39,14 @@ struct TravelerFeedView: View {
                         traveler: traveler,
                         checkIn: appState.travelerCheckIns[traveler.id],
                         proximity: appState.proximity(of: traveler),
-                        onLike: {
+                        onConnect: {
                             withAnimation(.snappy) {
-                                _ = appState.like(traveler)
+                                _ = appState.connect(with: traveler)
                             }
                         },
-                        onPass: {
+                        onSkip: {
                             withAnimation(.snappy) {
-                                appState.pass(traveler)
+                                appState.skip(traveler)
                             }
                         }
                     )

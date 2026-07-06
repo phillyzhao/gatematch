@@ -6,8 +6,8 @@ struct TravelerCardView: View {
     let checkIn: AirportCheckIn?
     /// Informational closeness — attendees may be at a different airport entirely.
     let proximity: Proximity
-    let onLike: () -> Void
-    let onPass: () -> Void
+    let onConnect: () -> Void
+    let onSkip: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -42,8 +42,8 @@ struct TravelerCardView: View {
             .buttonStyle(.plain)
 
             HStack(spacing: 12) {
-                Button(action: onPass) {
-                    Label("Pass", systemImage: "xmark")
+                Button(action: onSkip) {
+                    Label("Skip", systemImage: "xmark")
                         .font(.subheadline.weight(.semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -52,8 +52,8 @@ struct TravelerCardView: View {
                 }
                 .buttonStyle(.plain)
 
-                Button(action: onLike) {
-                    Label("Like", systemImage: "heart.fill")
+                Button(action: onConnect) {
+                    Label("Connect", systemImage: "person.badge.plus")
                         .font(.subheadline.weight(.semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -108,15 +108,15 @@ struct TravelerCardView: View {
                 traveler: MockData.travelers[0],
                 checkIn: MockData.travelerCheckIns[MockData.travelers[0].id],
                 proximity: .sameGate,
-                onLike: {},
-                onPass: {}
+                onConnect: {},
+                onSkip: {}
             )
             TravelerCardView(
                 traveler: MockData.travelers[5],
                 checkIn: MockData.travelerCheckIns[MockData.travelers[5].id],
                 proximity: .elsewhere,
-                onLike: {},
-                onPass: {}
+                onConnect: {},
+                onSkip: {}
             )
         }
         .padding()

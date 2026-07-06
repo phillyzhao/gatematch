@@ -4,10 +4,10 @@ struct MainTabView: View {
     @Environment(AppState.self) private var appState
 
     private enum Tab: Hashable {
-        case nearby, matches, settings
+        case travelers, connections, settings
     }
 
-    @State private var selection: Tab = .nearby
+    @State private var selection: Tab = .travelers
 
     var body: some View {
         @Bindable var appState = appState
@@ -19,14 +19,14 @@ struct MainTabView: View {
                     AirportCheckInView()
                 }
             }
-            .tabItem { Label("Nearby", systemImage: "person.2.fill") }
-            .tag(Tab.nearby)
+            .tabItem { Label("Travelers", systemImage: "person.2.fill") }
+            .tag(Tab.travelers)
 
             NavigationStack {
-                MatchesView()
+                ConnectionsView()
             }
-            .tabItem { Label("Matches", systemImage: "heart.fill") }
-            .tag(Tab.matches)
+            .tabItem { Label("Connections", systemImage: "person.line.dotted.person.fill") }
+            .tag(Tab.connections)
 
             NavigationStack {
                 SettingsView()
@@ -35,13 +35,13 @@ struct MainTabView: View {
             .tag(Tab.settings)
         }
         .tint(Theme.brand)
-        .sheet(item: $appState.pendingMatchCelebration) { match in
-            if let traveler = appState.traveler(withID: match.travelerID),
+        .sheet(item: $appState.pendingCelebration) { connection in
+            if let traveler = appState.traveler(withID: connection.travelerID),
                let currentUser = appState.currentUser {
-                MatchCelebrationView(currentUser: currentUser, traveler: traveler) { openMatches in
-                    appState.pendingMatchCelebration = nil
-                    if openMatches {
-                        selection = .matches
+                ConnectionCelebrationView(currentUser: currentUser, traveler: traveler) { openConnections in
+                    appState.pendingCelebration = nil
+                    if openConnections {
+                        selection = .connections
                     }
                 }
             }
@@ -54,6 +54,7 @@ struct MainTabView: View {
         .environment({
             let state = AppState()
             state.currentUser = MockData.previewUser
+            state.joinedEvent = MockData.events.first
             return state
         }())
 }
