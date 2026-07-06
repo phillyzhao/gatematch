@@ -1,6 +1,17 @@
 import Foundation
 import Observation
 
+enum Proximity: Int, Comparable {
+    case sameGate = 0
+    case sameTerminal
+    case sameAirport
+    case elsewhere
+
+    static func < (lhs: Proximity, rhs: Proximity) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+}
+
 /// Single source of truth for the local-only prototype.
 /// No networking — everything lives in memory, seeded from MockData.
 @Observable
@@ -67,31 +78,34 @@ final class AppState {
 
     // MARK: Feed
 
-    /// Travelers checked into the same airport whom the user hasn't acted on.
-    /// Closest first: same gate, then same terminal, then the rest of the airport.
-    var nearbyTravelers: [UserProfile] {
-        guard checkIn != nil else { return [] }
+    /// Attendees of the joined event whom the user hasn't acted on.
+    /// The event is the filter; airport proximity only affects sort order.
+    var eventTravelers: [UserProfile] {
+        guard let joinedEvent else { return [] }
         return travelers
             .filter { traveler in
                 traveler.id != currentUser?.id
+                    && travelerEventIDs[traveler.id] == joinedEvent.id
                     && !likedIDs.contains(traveler.id)
                     && !passedIDs.contains(traveler.id)
                     && !blockedIDs.contains(traveler.id)
-                    && travelerCheckIns[traveler.id]?.airportCode == checkIn?.airportCode
             }
             .sorted {
-                (proximityRank(of: $0), $0.firstName) < (proximityRank(of: $1), $1.firstName)
+                (proximity(of: $0).rawValue, $0.firstName) < (proximity(of: $1).rawValue, $1.firstName)
             }
     }
 
-    /// 0 = same gate, 1 = same terminal, 2 = same airport.
-    func proximityRank(of traveler: UserProfile) -> Int {
-        guard let checkIn, let theirs = travelerCheckIns[traveler.id] else { return 2 }
+    /// How close another traveler is right now — informational only, never a filter.
+    func proximity(of traveler: UserProfile) -> Proximity {
+        guard let checkIn,
+              let theirs = travelerCheckIns[traveler.id],
+              theirs.airportCode == checkIn.airportCode
+        else { return .elsewhere }
         if theirs.terminal == checkIn.terminal {
-            if !checkIn.gate.isEmpty && theirs.gate == checkIn.gate { return 0 }
-            return 1
+            if !checkIn.gate.isEmpty && theirs.gate == checkIn.gate { return .sameGate }
+            return .sameTerminal
         }
-        return 2
+        return .sameAirport
     }
 
     /// Records a like. If the traveler already liked the user (mock), it's a match.

@@ -4,9 +4,8 @@ struct TravelerCardView: View {
     let traveler: UserProfile
     /// The traveler's check-in (used for the location line).
     let checkIn: AirportCheckIn?
-    let sameTerminal: Bool
-    /// Only true when the traveler has chosen to share their exact gate.
-    let sameGate: Bool
+    /// Informational closeness — attendees may be at a different airport entirely.
+    let proximity: Proximity
     let onLike: () -> Void
     let onPass: () -> Void
 
@@ -68,21 +67,27 @@ struct TravelerCardView: View {
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
     }
 
-    /// Terminal is always fine to show; the exact gate only if the traveler opted in.
+    /// Airport and terminal are fine to show; the exact gate only if the traveler opted in.
     private var locationLine: String? {
         guard let checkIn else { return nil }
+        var parts = [checkIn.airportCode, checkIn.terminal]
         if traveler.showsExactGate && !checkIn.gate.isEmpty {
-            return "\(checkIn.terminal) · Gate \(checkIn.gate)"
+            parts.append("Gate \(checkIn.gate)")
         }
-        return checkIn.terminal
+        return parts.joined(separator: " · ")
     }
 
     @ViewBuilder
     private var proximityChip: some View {
-        if sameGate && traveler.showsExactGate {
+        switch proximity {
+        case .sameGate where traveler.showsExactGate:
             chip("At your gate", prominent: true)
-        } else if sameTerminal {
+        case .sameGate, .sameTerminal:
             chip("Same terminal", prominent: false)
+        case .sameAirport:
+            chip("At your airport", prominent: false)
+        case .elsewhere:
+            EmptyView()
         }
     }
 
@@ -102,16 +107,14 @@ struct TravelerCardView: View {
             TravelerCardView(
                 traveler: MockData.travelers[0],
                 checkIn: MockData.travelerCheckIns[MockData.travelers[0].id],
-                sameTerminal: true,
-                sameGate: true,
+                proximity: .sameGate,
                 onLike: {},
                 onPass: {}
             )
             TravelerCardView(
-                traveler: MockData.travelers[1],
-                checkIn: MockData.travelerCheckIns[MockData.travelers[1].id],
-                sameTerminal: true,
-                sameGate: false,
+                traveler: MockData.travelers[5],
+                checkIn: MockData.travelerCheckIns[MockData.travelers[5].id],
+                proximity: .elsewhere,
                 onLike: {},
                 onPass: {}
             )

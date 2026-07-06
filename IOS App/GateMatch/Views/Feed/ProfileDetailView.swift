@@ -10,7 +10,7 @@ struct ProfileDetailView: View {
 
     /// Like/Pass only make sense while the traveler is still in the feed.
     private var isActionable: Bool {
-        appState.nearbyTravelers.contains(traveler)
+        appState.eventTravelers.contains(traveler)
     }
 
     var body: some View {

@@ -5,11 +5,11 @@ struct TravelerFeedView: View {
 
     var body: some View {
         Group {
-            if appState.nearbyTravelers.isEmpty {
+            if appState.eventTravelers.isEmpty {
                 ContentUnavailableView(
-                    "No travelers nearby",
+                    "No attendees yet",
                     systemImage: "person.2",
-                    description: Text("Nobody else is checked in at your airport right now. Check back soon.")
+                    description: Text("You're the first traveler from your event here. Check back soon.")
                 )
             } else {
                 feedList
@@ -28,18 +28,17 @@ struct TravelerFeedView: View {
                 .font(.subheadline)
             }
         }
-        .safeAreaInset(edge: .top) { checkInBanner }
+        .safeAreaInset(edge: .top) { eventBanner }
     }
 
     private var feedList: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
-                ForEach(appState.nearbyTravelers) { traveler in
+                ForEach(appState.eventTravelers) { traveler in
                     TravelerCardView(
                         traveler: traveler,
                         checkIn: appState.travelerCheckIns[traveler.id],
-                        sameTerminal: appState.proximityRank(of: traveler) <= 1,
-                        sameGate: appState.proximityRank(of: traveler) == 0,
+                        proximity: appState.proximity(of: traveler),
                         onLike: {
                             withAnimation(.snappy) {
                                 _ = appState.like(traveler)
@@ -57,21 +56,28 @@ struct TravelerFeedView: View {
         }
     }
 
-    private var checkInBanner: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "airplane")
-                .font(.caption)
-                .foregroundStyle(Theme.brand)
-            Text(bannerText)
-                .font(.footnote.weight(.medium))
-            Spacer()
+    private var eventBanner: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            if let event = appState.joinedEvent {
+                Text(event.name)
+                    .font(.footnote.weight(.semibold))
+            }
+            HStack(spacing: 6) {
+                Image(systemName: "airplane")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.brand)
+                Text(checkInText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
         .background(.bar)
     }
 
-    private var bannerText: String {
+    private var checkInText: String {
         guard let checkIn = appState.checkIn else { return "" }
         var parts = [checkIn.airportCode, checkIn.terminal]
         if !checkIn.gate.isEmpty {
