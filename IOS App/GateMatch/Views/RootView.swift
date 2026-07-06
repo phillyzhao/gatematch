@@ -5,13 +5,16 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if appState.hasOnboarded {
-                MainTabView()
-            } else {
+            if !appState.hasOnboarded {
                 OnboardingView()
+            } else if !appState.hasJoinedEvent {
+                EventSelectionView()
+            } else {
+                MainTabView()
             }
         }
         .animation(.easeInOut(duration: 0.25), value: appState.hasOnboarded)
+        .animation(.easeInOut(duration: 0.25), value: appState.hasJoinedEvent)
     }
 }
 

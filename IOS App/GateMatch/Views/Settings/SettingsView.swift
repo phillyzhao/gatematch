@@ -4,16 +4,29 @@ struct SettingsView: View {
     @Environment(AppState.self) private var appState
 
     @State private var showReportAlert = false
+    @State private var showLeaveEventConfirm = false
 
     var body: some View {
         Form {
             profileSection
+            eventSection
             privacySection
             safetySection
             checkInSection
             aboutSection
         }
         .navigationTitle("Settings")
+        .confirmationDialog(
+            "Leave this event?",
+            isPresented: $showLeaveEventConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Leave event", role: .destructive) {
+                appState.leaveEvent()
+            }
+        } message: {
+            Text("Your airport check-in will be cleared too. Your connections and chats are kept.")
+        }
         .alert("Report a problem", isPresented: $showReportAlert) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -39,6 +52,25 @@ struct SettingsView: View {
                     Text(user.bio)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var eventSection: some View {
+        if let event = appState.joinedEvent {
+            Section("Event") {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(event.name)
+                        .font(.headline)
+                    Text("\(event.organizer) · \(event.city)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 2)
+                Button("Leave event", role: .destructive) {
+                    showLeaveEventConfirm = true
                 }
             }
         }

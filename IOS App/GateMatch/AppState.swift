@@ -8,11 +8,16 @@ import Observation
 final class AppState {
     // MARK: Current user
     var currentUser: UserProfile?
+    /// The official event the user has joined with its code. Gates travel info.
+    var joinedEvent: Event?
     var checkIn: AirportCheckIn?
 
     // MARK: Mock world
     let travelers: [UserProfile]
     let travelerCheckIns: [UUID: AirportCheckIn]
+    let events: [Event]
+    /// Which event each mock traveler is attending.
+    let travelerEventIDs: [UUID: UUID]
     /// Travelers who have already "liked" the current user (mock).
     let incomingLikes: Set<UUID>
 
@@ -27,20 +32,37 @@ final class AppState {
     var pendingMatchCelebration: Match?
 
     var hasOnboarded: Bool { currentUser != nil }
+    var hasJoinedEvent: Bool { joinedEvent != nil }
     var isCheckedIn: Bool { checkIn != nil }
 
     init(
         travelers: [UserProfile] = MockData.travelers,
         travelerCheckIns: [UUID: AirportCheckIn] = MockData.travelerCheckIns,
+        events: [Event] = MockData.events,
+        travelerEventIDs: [UUID: UUID] = MockData.travelerEventIDs,
         incomingLikes: Set<UUID> = MockData.incomingLikes
     ) {
         self.travelers = travelers
         self.travelerCheckIns = travelerCheckIns
+        self.events = events
+        self.travelerEventIDs = travelerEventIDs
         self.incomingLikes = incomingLikes
     }
 
     func traveler(withID id: UUID) -> UserProfile? {
         travelers.first { $0.id == id }
+    }
+
+    // MARK: Events
+
+    func attendeeCount(for event: Event) -> Int {
+        travelerEventIDs.values.filter { $0 == event.id }.count
+    }
+
+    /// Leaving an event also clears travel info — it was scoped to that trip.
+    func leaveEvent() {
+        joinedEvent = nil
+        checkIn = nil
     }
 
     // MARK: Feed
@@ -103,6 +125,7 @@ final class AppState {
     static var preview: AppState {
         let state = AppState()
         state.currentUser = MockData.previewUser
+        state.joinedEvent = MockData.events.first
         state.checkIn = AirportCheckIn(
             userID: MockData.previewUser.id,
             airportCode: "ORD",

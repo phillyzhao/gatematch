@@ -95,6 +95,65 @@ enum MockData {
     /// liking them back creates an instant match.
     static let incomingLikes: Set<UUID> = [uuid(1), uuid(3), uuid(6)]
 
+    /// Official business events preloaded in the app. All fictional.
+    static let events: [Event] = [
+        Event(
+            id: uuid(201),
+            name: "Midwest Tech Summit 2026",
+            organizer: "Great Lakes Tech Council",
+            city: "Chicago",
+            category: "Conference",
+            startDate: Date().addingTimeInterval(2 * 86400),
+            endDate: Date().addingTimeInterval(4 * 86400),
+            code: "MTS2026"
+        ),
+        Event(
+            id: uuid(202),
+            name: "National Sales Leadership Conference",
+            organizer: "Sales Leaders Association",
+            city: "New York",
+            category: "Conference",
+            startDate: Date().addingTimeInterval(5 * 86400),
+            endDate: Date().addingTimeInterval(7 * 86400),
+            code: "SALES26"
+        ),
+        Event(
+            id: uuid(203),
+            name: "West Coast Founders Forum",
+            organizer: "Pacific Venture Network",
+            city: "Los Angeles",
+            category: "Summit",
+            startDate: Date().addingTimeInterval(3 * 86400),
+            endDate: Date().addingTimeInterval(4 * 86400),
+            code: "WCFF26"
+        ),
+        Event(
+            id: uuid(204),
+            name: "Atlanta Logistics Expo",
+            organizer: "Southeast Freight Alliance",
+            city: "Atlanta",
+            category: "Trade show",
+            startDate: Date().addingTimeInterval(6 * 86400),
+            endDate: Date().addingTimeInterval(8 * 86400),
+            code: "ALX2026"
+        ),
+    ]
+
+    /// Which event each mock traveler is attending. Most attend the
+    /// Midwest Tech Summit so the demo feed has plenty of people.
+    static let travelerEventIDs: [UUID: UUID] = [
+        uuid(1): uuid(201),  // Maya
+        uuid(2): uuid(201),  // Derek
+        uuid(3): uuid(201),  // Sofia
+        uuid(5): uuid(201),  // Priya
+        uuid(6): uuid(201),  // Noah
+        uuid(9): uuid(201),  // Grace
+        uuid(4): uuid(202),  // James
+        uuid(8): uuid(202),  // Leo
+        uuid(7): uuid(203),  // Amara
+        uuid(10): uuid(204), // Marcus
+    ]
+
     /// Opening line a mock traveler "sends" right after matching.
     static func greeting(from traveler: UserProfile, matchID: UUID) -> ChatMessage {
         let lines = [
