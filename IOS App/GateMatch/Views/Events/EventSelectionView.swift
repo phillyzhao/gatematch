@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Shown after onboarding, before any travel info: the user must join
-/// an official event with its registration code.
+/// The app's landing screen: anyone can browse official events without an
+/// account. Tapping an event asks for sign-up first (if needed), then the code.
 struct EventSelectionView: View {
     @Environment(AppState.self) private var appState
 
@@ -19,16 +19,23 @@ struct EventSelectionView: View {
                 .padding(20)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Your event")
+            .navigationTitle("Events")
             .sheet(item: $selectedEvent) { event in
-                EventJoinView(event: event)
+                // No account yet → sign up first; the sheet then flows
+                // straight into code entry for the tapped event.
+                if appState.hasOnboarded {
+                    EventJoinView(event: event)
+                } else {
+                    OnboardingView()
+                        .presentationDetents([.large])
+                }
             }
         }
         .tint(Theme.brand)
     }
 
     private var header: some View {
-        Text("GateMatch works around official events. Join yours with the code from your registration to meet fellow attendees while you travel.")
+        Text("Explore official events on GateMatch. Tap one to join with your registration code — you'll create a profile the first time.")
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .padding(.bottom, 4)
@@ -38,7 +45,9 @@ struct EventSelectionView: View {
         Button {
             selectedEvent = event
         } label: {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 12) {
+                imagePlaceholder(for: event)
+
                 HStack {
                     Text(event.category)
                         .font(.caption2.weight(.semibold))
@@ -77,6 +86,37 @@ struct EventSelectionView: View {
         .buttonStyle(.plain)
     }
 
+    /// Placeholder box where the event image will go in a later version.
+    private func imagePlaceholder(for event: Event) -> some View {
+        RoundedRectangle(cornerRadius: 12)
+            .fill(Color(.tertiarySystemFill))
+            .frame(height: 130)
+            .overlay {
+                Image(systemName: "photo")
+                    .font(.title)
+                    .foregroundStyle(.tertiary)
+            }
+            .overlay(alignment: .topTrailing) {
+                connectionsBadge(for: event)
+                    .padding(8)
+            }
+    }
+
+    /// Circular pfp-style badge: how many of your connections are going.
+    private func connectionsBadge(for event: Event) -> some View {
+        let count = appState.connectionsAttending(event)
+        return ZStack {
+            Circle()
+                .fill(Theme.brand)
+            Text("\(count)")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(.white)
+        }
+        .frame(width: 34, height: 34)
+        .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+        .accessibilityLabel("\(count) of your connections are going")
+    }
+
     private func dateRange(_ event: Event) -> String {
         let start = event.startDate.formatted(.dateTime.month(.abbreviated).day())
         let end = event.endDate.formatted(.dateTime.month(.abbreviated).day())
@@ -84,7 +124,16 @@ struct EventSelectionView: View {
     }
 }
 
-#Preview {
+#Preview("Browsing, no account") {
     EventSelectionView()
         .environment(AppState())
+}
+
+#Preview("With connections") {
+    EventSelectionView()
+        .environment({
+            let state = AppState.preview
+            state.leaveEvent()
+            return state
+        }())
 }

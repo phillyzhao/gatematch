@@ -70,6 +70,16 @@ final class AppState {
         travelerEventIDs.values.filter { $0 == event.id }.count
     }
 
+    /// How many of the user's connections are attending the given event.
+    func connectionsAttending(_ event: Event) -> Int {
+        connections
+            .filter {
+                travelerEventIDs[$0.travelerID] == event.id
+                    && !blockedIDs.contains($0.travelerID)
+            }
+            .count
+    }
+
     /// Leaving an event also clears travel info — it was scoped to that trip.
     func leaveEvent() {
         joinedEvent = nil

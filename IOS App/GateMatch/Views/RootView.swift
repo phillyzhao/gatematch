@@ -4,26 +4,25 @@ struct RootView: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
+        // Browse-first: no sign-up gate. The app opens on the event browser;
+        // a profile is only created when the user joins their first event.
         Group {
-            if !appState.hasOnboarded {
-                OnboardingView()
-            } else if !appState.hasJoinedEvent {
-                EventSelectionView()
-            } else {
+            if appState.hasJoinedEvent {
                 MainTabView()
+            } else {
+                EventSelectionView()
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: appState.hasOnboarded)
         .animation(.easeInOut(duration: 0.25), value: appState.hasJoinedEvent)
     }
 }
 
-#Preview("Onboarding") {
+#Preview("Browsing") {
     RootView()
         .environment(AppState())
 }
 
-#Preview("Onboarded") {
+#Preview("Event joined") {
     RootView()
         .environment(AppState.preview)
 }
