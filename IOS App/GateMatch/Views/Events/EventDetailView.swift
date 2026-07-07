@@ -50,7 +50,7 @@ struct EventDetailView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("About this event")
-                        .font(.footnote.weight(.semibold))
+                        .font(Theme.heading(13))
                         .foregroundStyle(.secondary)
                     Text(event.details)
                         .font(.body)

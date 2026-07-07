@@ -194,7 +194,7 @@ struct AirportCheckInView: View {
 
     private func sectionLabel(_ text: String) -> some View {
         Text(text)
-            .font(.footnote.weight(.semibold))
+            .font(Theme.heading(13))
             .foregroundStyle(.secondary)
     }
 

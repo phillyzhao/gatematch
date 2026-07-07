@@ -57,7 +57,7 @@ struct FriendsMapView: View {
     private var header: some View {
         HStack(spacing: 10) {
             Text("Friends Map")
-                .font(.headline)
+                .font(Theme.heading(17))
             Text("BETA")
                 .font(.caption2.weight(.bold))
                 .padding(.horizontal, 8)

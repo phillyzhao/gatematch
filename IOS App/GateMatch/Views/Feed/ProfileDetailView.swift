@@ -73,7 +73,7 @@ struct ProfileDetailView: View {
             AvatarView(profile: traveler, size: 96)
             VStack(spacing: 4) {
                 Text("\(traveler.firstName), \(traveler.age)")
-                    .font(.title2.bold())
+                    .font(Theme.display(22))
                 Label(traveler.travelPurpose.rawValue, systemImage: traveler.travelPurpose.symbolName)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -85,7 +85,7 @@ struct ProfileDetailView: View {
     private var aboutCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("About")
-                .font(.footnote.weight(.semibold))
+                .font(Theme.heading(13))
                 .foregroundStyle(.secondary)
             Text(traveler.bio.isEmpty ? "No bio yet." : traveler.bio)
                 .font(.body)
@@ -98,7 +98,7 @@ struct ProfileDetailView: View {
     private var locationCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("At the airport")
-                .font(.footnote.weight(.semibold))
+                .font(Theme.heading(13))
                 .foregroundStyle(.secondary)
 
             if let checkIn = appState.travelerCheckIns[traveler.id] {

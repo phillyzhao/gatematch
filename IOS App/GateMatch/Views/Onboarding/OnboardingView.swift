@@ -103,7 +103,7 @@ struct OnboardingView: View {
     private func labeledField(_ label: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
-                .font(.footnote.weight(.semibold))
+                .font(Theme.heading(13))
                 .foregroundStyle(.secondary)
             content()
                 .padding(.horizontal, 14)

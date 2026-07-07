@@ -179,6 +179,15 @@ struct EventSelectionView: View {
                 connectionsBadge(for: event)
                     .padding(8)
             }
+            .overlay(alignment: .bottomLeading) {
+                Text(dateRange(event))
+                    .font(Theme.heading(11))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(.ultraThinMaterial))
+                    .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08)))
+                    .padding(8)
+            }
     }
 
     /// Circular pfp-style badge: how many of your connections are going.

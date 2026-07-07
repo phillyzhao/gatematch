@@ -17,7 +17,7 @@ struct TravelerCardView: View {
                         AvatarView(profile: traveler)
                         VStack(alignment: .leading, spacing: 3) {
                             Text("\(traveler.firstName), \(traveler.age)")
-                                .font(.headline)
+                                .font(Theme.heading(16))
                             Label(traveler.travelPurpose.rawValue, systemImage: traveler.travelPurpose.symbolName)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
