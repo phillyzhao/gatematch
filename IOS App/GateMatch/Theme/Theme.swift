@@ -1,5 +1,20 @@
 import SwiftUI
 
+enum AppearanceMode: String, CaseIterable, Identifiable {
+    case system, light, dark
+
+    var id: String { rawValue }
+    var label: String { rawValue.capitalized }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
+        }
+    }
+}
+
 enum Theme {
     /// GateMatch brand blue — strong and direct. Always used as a flat fill,
     /// never behind shadows, glows, or dimming overlays.

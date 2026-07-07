@@ -13,9 +13,9 @@ struct ConnectionsView: View {
         Group {
             if visibleConnections.isEmpty {
                 ContentUnavailableView(
-                    "No connections yet",
-                    systemImage: "person.line.dotted.person",
-                    description: Text("When you and another attendee both want to meet, they show up here.")
+                    "No messages yet",
+                    systemImage: "bubble.left.and.bubble.right",
+                    description: Text("When you and another attendee both want to meet, your chat starts here.")
                 )
             } else {
                 List(visibleConnections) { connection in
@@ -28,7 +28,7 @@ struct ConnectionsView: View {
                 .listStyle(.insetGrouped)
             }
         }
-        .navigationTitle("Connections")
+        .navigationTitle("Messages")
         .navigationDestination(for: Connection.self) { connection in
             ChatView(connection: connection)
         }

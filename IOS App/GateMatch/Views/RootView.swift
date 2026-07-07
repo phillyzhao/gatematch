@@ -1,19 +1,11 @@
 import SwiftUI
 
 struct RootView: View {
-    @Environment(AppState.self) private var appState
+    @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.system.rawValue
 
     var body: some View {
-        // Browse-first: no sign-up gate. The app opens on the event browser;
-        // a profile is only created when the user joins their first event.
-        Group {
-            if appState.hasJoinedEvent {
-                MainTabView()
-            } else {
-                EventSelectionView()
-            }
-        }
-        .animation(.easeInOut(duration: 0.25), value: appState.hasJoinedEvent)
+        MainShellView()
+            .preferredColorScheme(AppearanceMode(rawValue: appearanceRaw)?.colorScheme)
     }
 }
 

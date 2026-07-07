@@ -5,8 +5,8 @@ import SwiftUI
 struct ConnectionCelebrationView: View {
     let currentUser: UserProfile
     let traveler: UserProfile
-    /// Called with `true` if the user wants to jump to Connections.
-    let onFinish: (_ openConnections: Bool) -> Void
+    /// Called with `true` if the user wants to jump to Messages.
+    let onFinish: (_ openMessages: Bool) -> Void
 
     var body: some View {
         VStack(spacing: 28) {
@@ -32,7 +32,7 @@ struct ConnectionCelebrationView: View {
                 Button {
                     onFinish(true)
                 } label: {
-                    Text("Open Connections")
+                    Text("Open Messages")
                         .font(.headline)
                         .foregroundStyle(Theme.brand)
                         .frame(maxWidth: .infinity)

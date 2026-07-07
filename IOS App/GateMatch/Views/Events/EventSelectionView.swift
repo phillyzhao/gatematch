@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The app's landing screen: anyone can browse official events without an
+/// The Events tab root: anyone can browse official events without an
 /// account. Tapping an event asks for sign-up first (if needed), then the code.
 struct EventSelectionView: View {
     @Environment(AppState.self) private var appState
@@ -8,30 +8,32 @@ struct EventSelectionView: View {
     @State private var selectedEvent: Event?
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    header
-                    ForEach(appState.events) { event in
-                        eventCard(event)
-                    }
-                }
-                .padding(20)
-            }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Events")
-            .sheet(item: $selectedEvent) { event in
-                // No account yet → sign up first; the sheet then flows
-                // straight into code entry for the tapped event.
-                if appState.hasOnboarded {
-                    EventJoinView(event: event)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if let joined = appState.joinedEvent {
+                    joinedCard(joined)
                 } else {
-                    OnboardingView()
-                        .presentationDetents([.large])
+                    header
                 }
+                ForEach(appState.events) { event in
+                    eventCard(event)
+                }
+            }
+            .padding(20)
+        }
+        .contentMargins(.bottom, 88, for: .scrollContent)
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("Events")
+        .sheet(item: $selectedEvent) { event in
+            // No account yet → sign up first; the sheet then flows
+            // straight into code entry for the tapped event.
+            if appState.hasOnboarded {
+                EventJoinView(event: event)
+            } else {
+                OnboardingView()
+                    .presentationDetents([.large])
             }
         }
-        .tint(Theme.brand)
     }
 
     private var header: some View {
@@ -39,6 +41,38 @@ struct EventSelectionView: View {
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .padding(.bottom, 4)
+    }
+
+    /// Entry into the event you've joined: check-in and the traveler feed.
+    private func joinedCard(_ event: Event) -> some View {
+        NavigationLink(value: EventHomeRoute()) {
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.title3)
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40)
+                    .background(Theme.brand, in: Circle())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Your event")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Text(event.name)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Text(appState.isCheckedIn ? "Tap to meet travelers" : "Tap to check in at your airport")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(14)
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Theme.brand, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
     }
 
     private func eventCard(_ event: Event) -> some View {
@@ -125,15 +159,15 @@ struct EventSelectionView: View {
 }
 
 #Preview("Browsing, no account") {
-    EventSelectionView()
-        .environment(AppState())
+    NavigationStack {
+        EventSelectionView()
+    }
+    .environment(AppState())
 }
 
-#Preview("With connections") {
-    EventSelectionView()
-        .environment({
-            let state = AppState.preview
-            state.leaveEvent()
-            return state
-        }())
+#Preview("Event joined") {
+    NavigationStack {
+        EventSelectionView()
+    }
+    .environment(AppState.preview)
 }
