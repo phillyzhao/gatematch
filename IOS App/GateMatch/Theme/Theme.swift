@@ -15,14 +15,37 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
     }
 }
 
-/// Applies the user's chosen appearance. Sheets and full-screen covers don't
-/// reliably inherit `preferredColorScheme` from the root, so every
-/// presentation root applies this too — keeping dark mode consistent.
+/// Applies the user's chosen appearance. `preferredColorScheme` alone isn't
+/// enough: sheets, covers, and UIKit-backed containers (like the paged
+/// TabView behind the main shell) don't reliably follow it — so this also
+/// overrides the interface style at the window level, which covers everything.
 struct AppAppearanceModifier: ViewModifier {
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.system.rawValue
 
     func body(content: Content) -> some View {
-        content.preferredColorScheme(AppearanceMode(rawValue: appearanceRaw)?.colorScheme)
+        let mode = AppearanceMode(rawValue: appearanceRaw) ?? .system
+        content
+            .preferredColorScheme(mode.colorScheme)
+            .onAppear {
+                Self.applyWindowOverride(mode)
+            }
+            .onChange(of: appearanceRaw) {
+                Self.applyWindowOverride(AppearanceMode(rawValue: appearanceRaw) ?? .system)
+            }
+    }
+
+    static func applyWindowOverride(_ mode: AppearanceMode) {
+        let style: UIUserInterfaceStyle
+        switch mode {
+        case .system: style = .unspecified
+        case .light: style = .light
+        case .dark: style = .dark
+        }
+        for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
+            for window in scene.windows {
+                window.overrideUserInterfaceStyle = style
+            }
+        }
     }
 }
 
