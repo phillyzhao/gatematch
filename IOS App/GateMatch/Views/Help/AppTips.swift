@@ -30,19 +30,6 @@ struct ConnectTip: Tip {
     }
 }
 
-/// The search bar hides while scrolling; the gesture back isn't obvious.
-struct SearchTip: Tip {
-    var title: Text {
-        Text("Search comes and goes")
-    }
-    var message: Text? {
-        Text("Search hides while you scroll down. Swipe up a little to bring it back.")
-    }
-    var image: Image? {
-        Image(systemName: "magnifyingglass")
-    }
-}
-
 /// A globe icon with a BETA tag doesn't explain itself.
 struct MapTip: Tip {
     var title: Text {
