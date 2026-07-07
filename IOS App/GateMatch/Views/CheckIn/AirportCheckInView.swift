@@ -27,6 +27,7 @@ struct AirportCheckInView: View {
         .scrollDismissesKeyboard(.interactively)
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Check in")
+        .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) { checkInButton }
     }
 
@@ -46,7 +47,7 @@ struct AirportCheckInView: View {
         } label: {
             HStack(spacing: 14) {
                 Text(airport.code)
-                    .font(.subheadline.weight(.bold).monospaced())
+                    .font(Theme.mono(15))
                     .frame(width: 56, height: 38)
                     .background(
                         isSelected ? Theme.brand : Color(.tertiarySystemFill),
@@ -141,7 +142,7 @@ struct AirportCheckInView: View {
     private var checkInButton: some View {
         Button(action: checkIn) {
             Text(selectedAirport.map { "Check in at \($0.code)" } ?? "Check in")
-                .font(.headline)
+                .font(Theme.heading(17))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)

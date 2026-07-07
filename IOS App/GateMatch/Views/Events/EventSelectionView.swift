@@ -75,6 +75,7 @@ struct EventSelectionView: View {
         .contentMargins(.bottom, 88, for: .scrollContent)
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Events")
+        .navigationBarTitleDisplayMode(.inline)
         .notificationBell()
         .navigationDestination(for: Event.self) { event in
             EventDetailView(event: event)
@@ -179,7 +180,7 @@ struct EventSelectionView: View {
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(event.name)
-                        .font(.headline)
+                        .font(Theme.heading(17))
                         .foregroundStyle(.primary)
                         .multilineTextAlignment(.leading)
                     Text(event.organizer)

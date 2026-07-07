@@ -33,7 +33,7 @@ struct OnboardingView: View {
                 .font(.system(size: 40))
                 .foregroundStyle(Theme.brand)
             Text("Create your profile")
-                .font(.title.bold())
+                .font(Theme.display(26))
             Text("You need a profile to join events and meet fellow attendees.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -116,7 +116,7 @@ struct OnboardingView: View {
     private var continueButton: some View {
         Button(action: completeOnboarding) {
             Text("Continue")
-                .font(.headline)
+                .font(Theme.heading(17))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)

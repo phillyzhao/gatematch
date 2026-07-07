@@ -18,6 +18,7 @@ struct TravelerFeedView: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Travelers")
+        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: UserProfile.self) { traveler in
             ProfileDetailView(traveler: traveler)
         }

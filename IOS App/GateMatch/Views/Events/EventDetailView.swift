@@ -32,7 +32,7 @@ struct EventDetailView: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(event.name)
-                        .font(.title2.bold())
+                        .font(Theme.display(22))
                     Text(event.organizer)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)

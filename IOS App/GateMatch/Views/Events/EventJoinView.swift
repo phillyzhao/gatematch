@@ -59,7 +59,7 @@ struct EventJoinView: View {
             TextField("From your registration email", text: $code)
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
-                .font(.body.monospaced())
+                .font(Theme.mono(17))
                 .focused($codeFocused)
                 .submitLabel(.join)
                 .onSubmit(join)
@@ -85,7 +85,7 @@ struct EventJoinView: View {
     private var joinButton: some View {
         Button(action: join) {
             Text("Verify & join")
-                .font(.headline)
+                .font(Theme.heading(17))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)

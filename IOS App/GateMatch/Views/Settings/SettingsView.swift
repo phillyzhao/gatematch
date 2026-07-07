@@ -17,6 +17,7 @@ struct SettingsView: View {
             aboutSection
         }
         .navigationTitle("Settings")
+        .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog(
             "Leave this event?",
             isPresented: $showLeaveEventConfirm,

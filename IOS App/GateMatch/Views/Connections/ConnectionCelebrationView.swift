@@ -19,7 +19,7 @@ struct ConnectionCelebrationView: View {
 
             VStack(spacing: 8) {
                 Text("You're connected!")
-                    .font(.largeTitle.bold())
+                    .font(Theme.display(32))
                 Text("You and \(traveler.firstName) both want to meet. Say hi before boarding.")
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
@@ -33,7 +33,7 @@ struct ConnectionCelebrationView: View {
                     onFinish(true)
                 } label: {
                     Text("Open Messages")
-                        .font(.headline)
+                        .font(Theme.heading(17))
                         .foregroundStyle(Theme.brand)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)

@@ -29,6 +29,7 @@ struct ConnectionsView: View {
             }
         }
         .navigationTitle("Messages")
+        .navigationBarTitleDisplayMode(.inline)
         .notificationBell()
         .navigationDestination(for: Connection.self) { connection in
             ChatView(connection: connection)

@@ -20,6 +20,23 @@ enum Theme {
     /// never behind shadows, glows, or dimming overlays.
     static let brand = Color(red: 22 / 255, green: 86 / 255, blue: 219 / 255)
 
+    // MARK: Brand fonts (bundled, registered at launch)
+
+    /// Big display moments: celebration titles, event names on detail pages.
+    static func display(_ size: CGFloat) -> Font {
+        .custom("Montserrat-Bold", size: size)
+    }
+
+    /// Headings and buttons.
+    static func heading(_ size: CGFloat) -> Font {
+        .custom("Montserrat-SemiBold", size: size)
+    }
+
+    /// Codes and airport identifiers.
+    static func mono(_ size: CGFloat) -> Font {
+        .custom("RobotoMono-Medium", size: size)
+    }
+
     /// Deterministic avatar tint so each traveler keeps their color everywhere.
     static func avatarColor(for profile: UserProfile) -> Color {
         let palette: [Color] = [.teal, .indigo, .purple, .orange, .pink, .green, .cyan, .mint]
