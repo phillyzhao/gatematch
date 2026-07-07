@@ -73,6 +73,7 @@ struct EventSelectionView: View {
         .contentMargins(.bottom, 88, for: .scrollContent)
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Events")
+        .notificationBell()
         .navigationDestination(for: Event.self) { event in
             EventDetailView(event: event)
         }

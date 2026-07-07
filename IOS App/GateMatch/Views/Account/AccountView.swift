@@ -60,6 +60,7 @@ struct AccountView: View {
             }
         }
         .navigationTitle("Account")
+        .notificationBell()
         .navigationDestination(for: SettingsRoute.self) { _ in
             SettingsView()
         }
