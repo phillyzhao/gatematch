@@ -2,28 +2,117 @@ import SwiftUI
 
 /// The Events tab root: anyone can browse official events without an
 /// account. Tapping an event asks for sign-up first (if needed), then the code.
+private struct EventsScrollOffsetKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
 struct EventSelectionView: View {
     @Environment(AppState.self) private var appState
 
+    @State private var searchText = ""
+    @State private var isSearchVisible = true
+    @State private var lastScrollOffset: CGFloat = 0
+    @FocusState private var searchFocused: Bool
+
+    private var filteredEvents: [Event] {
+        let query = searchText.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return appState.events }
+        return appState.events.filter {
+            $0.name.localizedCaseInsensitiveContains(query)
+                || $0.city.localizedCaseInsensitiveContains(query)
+                || $0.organizer.localizedCaseInsensitiveContains(query)
+                || $0.category.localizedCaseInsensitiveContains(query)
+        }
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                if let joined = appState.joinedEvent {
-                    joinedCard(joined)
-                } else {
-                    header
+        GeometryReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    if let joined = appState.joinedEvent {
+                        joinedCard(joined)
+                    } else {
+                        header
+                    }
+                    if filteredEvents.isEmpty {
+                        ContentUnavailableView.search(text: searchText)
+                            .padding(.top, 40)
+                    }
+                    ForEach(filteredEvents) { event in
+                        eventCard(event)
+                    }
                 }
-                ForEach(appState.events) { event in
-                    eventCard(event)
+                .padding(20)
+                .background(
+                    GeometryReader { geo in
+                        Color.clear.preference(
+                            key: EventsScrollOffsetKey.self,
+                            value: geo.frame(in: .named("eventsScroll")).minY
+                        )
+                    }
+                )
+            }
+            .coordinateSpace(name: "eventsScroll")
+            .onPreferenceChange(EventsScrollOffsetKey.self) { offset in
+                handleScroll(offset)
+            }
+            // Floating search, about a third of the way down the screen.
+            // Hides while scrolling down; swipe up brings it back.
+            .overlay(alignment: .top) {
+                if isSearchVisible {
+                    searchBar
+                        .padding(.horizontal, 28)
+                        .padding(.top, proxy.size.height / 3)
+                        .transition(.opacity)
                 }
             }
-            .padding(20)
         }
         .contentMargins(.bottom, 88, for: .scrollContent)
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Events")
         .navigationDestination(for: Event.self) { event in
             EventDetailView(event: event)
+        }
+    }
+
+    private var searchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search events", text: $searchText)
+                .focused($searchFocused)
+                .autocorrectionDisabled()
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.tertiary)
+                }
+                .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .background(Capsule().fill(.ultraThinMaterial))
+        .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08)))
+        .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
+    }
+
+    private func handleScroll(_ offset: CGFloat) {
+        defer { lastScrollOffset = offset }
+        // Never hide mid-search.
+        guard searchText.isEmpty, !searchFocused else { return }
+        let delta = offset - lastScrollOffset
+        guard abs(delta) > 8 else { return }
+        let shouldShow = delta > 0 || offset >= 0
+        if shouldShow != isSearchVisible {
+            withAnimation(.snappy(duration: 0.25)) {
+                isSearchVisible = shouldShow
+            }
         }
     }
 
