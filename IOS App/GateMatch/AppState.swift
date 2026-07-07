@@ -41,6 +41,8 @@ final class AppState {
     var blockedIDs: Set<UUID> = []
     /// Set when a mutual connect just happened; drives the "You're connected" sheet.
     var pendingCelebration: Connection?
+    /// The helper-bot thread, available to every user (guests included).
+    var botMessages: [ChatMessage] = [HelperBot.greeting]
 
     var hasOnboarded: Bool { currentUser != nil }
     var hasJoinedEvent: Bool { joinedEvent != nil }
@@ -143,6 +145,23 @@ final class AppState {
         messages[connection.id, default: []].append(
             ChatMessage(connectionID: connection.id, senderID: currentUser.id, text: trimmed)
         )
+    }
+
+    /// Sends a message to the helper bot; it replies from its fixed Q&A list.
+    func sendToBot(_ text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let senderID = currentUser?.id ?? HelperBot.guestUserID
+        botMessages.append(
+            ChatMessage(connectionID: HelperBot.threadID, senderID: senderID, text: trimmed)
+        )
+        let reply = HelperBot.reply(to: trimmed)
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(600))
+            botMessages.append(
+                ChatMessage(connectionID: HelperBot.threadID, senderID: HelperBot.botID, text: reply)
+            )
+        }
     }
 
     /// Fully set-up state for SwiftUI previews: onboarded, event joined, checked in at ORD.

@@ -10,30 +10,73 @@ struct ConnectionsView: View {
     }
 
     var body: some View {
-        Group {
+        List {
+            // The helper bot is always here, for every user.
+            Section {
+                NavigationLink(value: BotRoute()) {
+                    botRow
+                }
+            }
+
             if visibleConnections.isEmpty {
-                ContentUnavailableView(
-                    "No messages yet",
-                    systemImage: "bubble.left.and.bubble.right",
-                    description: Text("When you and another attendee both want to meet, your chat starts here.")
-                )
+                Section {
+                    Text("When you and another attendee both want to meet, your chat starts here.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             } else {
-                List(visibleConnections) { connection in
-                    if let traveler = appState.traveler(withID: connection.travelerID) {
-                        NavigationLink(value: connection) {
-                            connectionRow(connection: connection, traveler: traveler)
+                Section("Travelers") {
+                    ForEach(visibleConnections) { connection in
+                        if let traveler = appState.traveler(withID: connection.travelerID) {
+                            NavigationLink(value: connection) {
+                                connectionRow(connection: connection, traveler: traveler)
+                            }
                         }
                     }
                 }
-                .listStyle(.insetGrouped)
             }
         }
+        .listStyle(.insetGrouped)
         .navigationTitle("Messages")
         .navigationBarTitleDisplayMode(.inline)
         .notificationBell()
         .navigationDestination(for: Connection.self) { connection in
             ChatView(connection: connection)
         }
+        .navigationDestination(for: BotRoute.self) { _ in
+            BotChatView()
+        }
+    }
+
+    private var botRow: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle().fill(Theme.brand)
+                Image(systemName: "sparkles")
+                    .font(.title3)
+                    .foregroundStyle(.white)
+            }
+            .frame(width: 48, height: 48)
+            .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text(HelperBot.name)
+                        .font(.headline)
+                    Text("BOT")
+                        .font(.caption2.weight(.bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color(.tertiarySystemFill), in: Capsule())
+                        .foregroundStyle(.secondary)
+                }
+                Text(appState.botMessages.last?.text ?? "Ask me how GateMatch works")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+        }
+        .padding(.vertical, 4)
     }
 
     private func connectionRow(connection: Connection, traveler: UserProfile) -> some View {
@@ -58,9 +101,16 @@ struct ConnectionsView: View {
     }
 }
 
-#Preview {
+#Preview("With connections") {
     NavigationStack {
         ConnectionsView()
     }
     .environment(AppState.preview)
+}
+
+#Preview("Bot only") {
+    NavigationStack {
+        ConnectionsView()
+    }
+    .environment(AppState())
 }
