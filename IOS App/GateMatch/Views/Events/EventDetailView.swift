@@ -66,15 +66,12 @@ struct EventDetailView: View {
         .sheet(isPresented: $showJoinSheet) {
             // No account yet → sign up first; the sheet then flows
             // straight into code entry for this event.
-            Group {
-                if appState.hasOnboarded {
-                    EventJoinView(event: event)
-                } else {
-                    OnboardingView()
-                        .presentationDetents([.large])
-                }
+            if appState.hasOnboarded {
+                EventJoinView(event: event)
+            } else {
+                OnboardingView()
+                    .presentationDetents([.large])
             }
-            .appAppearance()
         }
     }
 

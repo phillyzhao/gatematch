@@ -44,6 +44,12 @@ struct SettingsView: View {
                 }
             }
             .pickerStyle(.segmented)
+            // Apply instantly from here too — this page is where staleness shows.
+            .onChange(of: appearanceRaw) {
+                AppAppearanceModifier.applyWindowOverride(
+                    AppearanceMode(rawValue: appearanceRaw) ?? .system
+                )
+            }
         } header: {
             Text("Appearance")
         } footer: {

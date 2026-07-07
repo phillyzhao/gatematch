@@ -56,7 +56,6 @@ struct MainShellView: View {
         }
         .fullScreenCover(isPresented: $showMap) {
             FriendsMapView()
-                .appAppearance()
         }
         .sheet(item: $appState.pendingCelebration) { connection in
             if let traveler = appState.traveler(withID: connection.travelerID),
@@ -67,7 +66,6 @@ struct MainShellView: View {
                         withAnimation(.snappy) { selection = .messages }
                     }
                 }
-                .appAppearance()
             }
         }
     }

@@ -15,19 +15,17 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
     }
 }
 
-/// Applies the user's chosen appearance. `preferredColorScheme` alone isn't
-/// enough: sheets, covers, and UIKit-backed containers (like the paged
-/// TabView behind the main shell) don't reliably follow it — so this also
-/// overrides the interface style at the window level, which covers everything.
+/// Applies the user's chosen appearance by overriding the interface style at
+/// the window level — the single source of truth. Mixing in SwiftUI's
+/// `preferredColorScheme` caused UIKit-backed pieces (paged TabView, pickers)
+/// to latch onto stale values when switching, so it is deliberately not used.
 struct AppAppearanceModifier: ViewModifier {
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.system.rawValue
 
     func body(content: Content) -> some View {
-        let mode = AppearanceMode(rawValue: appearanceRaw) ?? .system
         content
-            .preferredColorScheme(mode.colorScheme)
             .onAppear {
-                Self.applyWindowOverride(mode)
+                Self.applyWindowOverride(AppearanceMode(rawValue: appearanceRaw) ?? .system)
             }
             .onChange(of: appearanceRaw) {
                 Self.applyWindowOverride(AppearanceMode(rawValue: appearanceRaw) ?? .system)

@@ -99,7 +99,6 @@ private struct NotificationBellModifier: ViewModifier {
             }
             .sheet(isPresented: $showNotifications) {
                 NotificationsView()
-                    .appAppearance()
             }
     }
 }
