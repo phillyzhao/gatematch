@@ -105,7 +105,8 @@ enum MockData {
             category: "Conference",
             startDate: Date().addingTimeInterval(2 * 86400),
             endDate: Date().addingTimeInterval(4 * 86400),
-            code: "MTS2026"
+            code: "MTS2026",
+            details: "Three days of talks, workshops, and hallway serendipity with founders, engineers, and operators from across the Midwest. Evening mixers every night, and a closing keynote on the future of regional tech."
         ),
         Event(
             id: uuid(202),
@@ -115,7 +116,8 @@ enum MockData {
             category: "Conference",
             startDate: Date().addingTimeInterval(5 * 86400),
             endDate: Date().addingTimeInterval(7 * 86400),
-            code: "SALES26"
+            code: "SALES26",
+            details: "The flagship gathering for revenue leaders: keynotes on pipeline craft, enablement deep-dives, and roundtables with CROs from the Fortune 500. Ends with the annual President's Club dinner."
         ),
         Event(
             id: uuid(203),
@@ -125,7 +127,8 @@ enum MockData {
             category: "Summit",
             startDate: Date().addingTimeInterval(3 * 86400),
             endDate: Date().addingTimeInterval(4 * 86400),
-            code: "WCFF26"
+            code: "WCFF26",
+            details: "An intimate two-day forum where early-stage founders trade playbooks with investors over long lunches and short pitches. Capped at 200 attendees to keep every conversation real."
         ),
         Event(
             id: uuid(204),
@@ -135,7 +138,8 @@ enum MockData {
             category: "Trade show",
             startDate: Date().addingTimeInterval(6 * 86400),
             endDate: Date().addingTimeInterval(8 * 86400),
-            code: "ALX2026"
+            code: "ALX2026",
+            details: "Where freight, ports, and last-mile innovators meet. An expo floor with 200+ booths, curated supplier matchmaking, and a live demo yard for autonomous cargo handling."
         ),
     ]
 

@@ -12,4 +12,6 @@ struct Event: Identifiable, Codable, Equatable, Hashable {
     let endDate: Date
     /// Shared join code from the attendee's registration.
     let code: String
+    /// Short description shown on the event's detail page.
+    let details: String
 }

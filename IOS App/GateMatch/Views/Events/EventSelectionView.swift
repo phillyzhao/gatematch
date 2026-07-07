@@ -5,8 +5,6 @@ import SwiftUI
 struct EventSelectionView: View {
     @Environment(AppState.self) private var appState
 
-    @State private var selectedEvent: Event?
-
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -24,20 +22,13 @@ struct EventSelectionView: View {
         .contentMargins(.bottom, 88, for: .scrollContent)
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Events")
-        .sheet(item: $selectedEvent) { event in
-            // No account yet → sign up first; the sheet then flows
-            // straight into code entry for the tapped event.
-            if appState.hasOnboarded {
-                EventJoinView(event: event)
-            } else {
-                OnboardingView()
-                    .presentationDetents([.large])
-            }
+        .navigationDestination(for: Event.self) { event in
+            EventDetailView(event: event)
         }
     }
 
     private var header: some View {
-        Text("Explore official events on GateMatch. Tap one to join with your registration code — you'll create a profile the first time.")
+        Text("Explore official events on GateMatch. Open one to see details and join with your registration code — you'll create a profile the first time.")
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .padding(.bottom, 4)
@@ -76,9 +67,7 @@ struct EventSelectionView: View {
     }
 
     private func eventCard(_ event: Event) -> some View {
-        Button {
-            selectedEvent = event
-        } label: {
+        NavigationLink(value: event) {
             VStack(alignment: .leading, spacing: 12) {
                 imagePlaceholder(for: event)
 
