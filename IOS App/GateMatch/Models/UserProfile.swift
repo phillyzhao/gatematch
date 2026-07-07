@@ -28,6 +28,8 @@ struct UserProfile: Identifiable, Codable, Equatable, Hashable {
     var bio: String
     /// Privacy: gate is only shown to others when the traveler opts in.
     var showsExactGate: Bool
+    /// Contact email — stored locally in the prototype.
+    var email: String = ""
 
     var initials: String {
         String(firstName.prefix(1)).uppercased()

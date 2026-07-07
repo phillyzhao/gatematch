@@ -3,6 +3,9 @@ import SwiftUI
 /// Route marker for the settings screen.
 struct SettingsRoute: Hashable {}
 
+/// Route marker for editing personal info.
+struct PersonalInfoRoute: Hashable {}
+
 struct AccountView: View {
     @Environment(AppState.self) private var appState
 
@@ -26,6 +29,14 @@ struct AccountView: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
+                }
+
+                Section {
+                    NavigationLink(value: PersonalInfoRoute()) {
+                        Label("Personal info", systemImage: "person.text.rectangle")
+                    }
+                } footer: {
+                    Text("Name, email, age, and bio.")
                 }
 
                 if let event = appState.joinedEvent {
@@ -64,6 +75,9 @@ struct AccountView: View {
         .notificationBell()
         .navigationDestination(for: SettingsRoute.self) { _ in
             SettingsView()
+        }
+        .navigationDestination(for: PersonalInfoRoute.self) { _ in
+            PersonalInfoView()
         }
     }
 }
