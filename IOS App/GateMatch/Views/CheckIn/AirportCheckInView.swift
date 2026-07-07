@@ -4,10 +4,32 @@ struct AirportCheckInView: View {
     @Environment(AppState.self) private var appState
 
     @State private var selectedAirport: Airport?
+    @State private var airportQuery = ""
     @State private var terminal = ""
     @State private var gate = ""
     @State private var hasFlightTime = false
     @State private var flightTime = Date().addingTimeInterval(2 * 3600)
+
+    /// The event's primary airports lead; a selection made via search stays visible.
+    private var suggestedAirports: [Airport] {
+        let primaries = appState.joinedEvent?.primaryAirportCodes.compactMap(Airport.named) ?? []
+        guard let selectedAirport, !primaries.contains(selectedAirport) else { return primaries }
+        return primaries + [selectedAirport]
+    }
+
+    private var airportResults: [Airport] {
+        let query = airportQuery.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return [] }
+        return Airport.all.filter {
+            $0.code.localizedCaseInsensitiveContains(query)
+                || $0.name.localizedCaseInsensitiveContains(query)
+                || $0.city.localizedCaseInsensitiveContains(query)
+        }
+    }
+
+    private var isSearchingAirports: Bool {
+        !airportQuery.trimmingCharacters(in: .whitespaces).isEmpty
+    }
 
     private var canCheckIn: Bool {
         selectedAirport != nil
@@ -34,16 +56,63 @@ struct AirportCheckInView: View {
     private var airportSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionLabel("Your airport")
-            ForEach(Airport.all) { airport in
-                airportRow(airport)
+            airportSearchField
+
+            if !isSearchingAirports {
+                if let event = appState.joinedEvent {
+                    Text("Suggested for \(event.name)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(suggestedAirports) { airport in
+                    airportRow(airport)
+                }
+                Text("Flying from somewhere else? Search all \(Airport.all.count) airports above.")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            } else if airportResults.isEmpty {
+                SearchEmptyStateView(
+                    query: airportQuery,
+                    message: "No airports match. Try a code like ORD or a city name.",
+                    suggestions: appState.joinedEvent?.primaryAirportCodes ?? ["ORD", "JFK", "LAX"],
+                    onSuggestion: { airportQuery = $0 },
+                    onClear: { airportQuery = "" }
+                )
+            } else {
+                ForEach(airportResults) { airport in
+                    airportRow(airport)
+                }
             }
         }
+    }
+
+    private var airportSearchField: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search airports", text: $airportQuery)
+                .autocorrectionDisabled()
+            if !airportQuery.isEmpty {
+                Button {
+                    airportQuery = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.tertiary)
+                }
+                .accessibilityLabel("Clear airport search")
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private func airportRow(_ airport: Airport) -> some View {
         let isSelected = selectedAirport == airport
         return Button {
             selectedAirport = airport
+            // Back to the suggested list, with the pick visible and checked.
+            withAnimation(.snappy) { airportQuery = "" }
         } label: {
             HStack(spacing: 14) {
                 Text(airport.code)

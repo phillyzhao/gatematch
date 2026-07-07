@@ -14,4 +14,6 @@ struct Event: Identifiable, Codable, Equatable, Hashable {
     let code: String
     /// Short description shown on the event's detail page.
     let details: String
+    /// Airports most attendees fly through — suggested first at check-in.
+    let primaryAirportCodes: [String]
 }

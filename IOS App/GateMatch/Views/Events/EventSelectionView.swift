@@ -29,8 +29,13 @@ struct EventSelectionView: View {
                 }
                 TipView(EventBadgeTip())
                 if filteredEvents.isEmpty {
-                    ContentUnavailableView.search(text: searchText)
-                        .padding(.top, 40)
+                    SearchEmptyStateView(
+                        query: searchText,
+                        message: "No events match what you're looking for yet. New events land regularly.",
+                        suggestions: ["Conference", "Summit", "Chicago", "Tech"],
+                        onSuggestion: { searchText = $0 },
+                        onClear: { searchText = "" }
+                    )
                 }
                 ForEach(filteredEvents) { event in
                     eventCard(event)
