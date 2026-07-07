@@ -13,6 +13,7 @@ struct MainShellView: View {
     @State private var eventsPath = NavigationPath()
     @State private var messagesPath = NavigationPath()
     @State private var accountPath = NavigationPath()
+    @State private var showMap = false
 
     /// The bar steps aside on detail screens so bottom actions stay reachable.
     private var isBarHidden: Bool {
@@ -52,6 +53,9 @@ struct MainShellView: View {
                 .animation(.snappy(duration: 0.25), value: isBarHidden)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
         }
+        .fullScreenCover(isPresented: $showMap) {
+            FriendsMapView()
+        }
         .sheet(item: $appState.pendingCelebration) { connection in
             if let traveler = appState.traveler(withID: connection.travelerID),
                let currentUser = appState.currentUser {
@@ -77,8 +81,41 @@ struct MainShellView: View {
             .background(Capsule().fill(.ultraThinMaterial))
             .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08)))
             .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
+
+            // Detached from the island on purpose — it's a mode, not a tab.
+            mapButton
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var mapButton: some View {
+        Button {
+            showMap = true
+        } label: {
+            VStack(spacing: 3) {
+                Image(systemName: "globe.americas.fill")
+                    .font(.system(size: 17, weight: .semibold))
+                Text("Map")
+                    .font(.caption2.weight(.medium))
+            }
+            .frame(width: 72, height: 48)
+            .foregroundStyle(Color.secondary)
+            .background(Capsule().fill(.ultraThinMaterial))
+            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08)))
+            .overlay(alignment: .topTrailing) {
+                Text("BETA")
+                    .font(.system(size: 7, weight: .bold))
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .background(Theme.brand, in: Capsule())
+                    .foregroundStyle(.white)
+                    .offset(x: 2, y: -4)
+            }
+            .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Friends map, beta")
     }
 
     private func tabButton(_ tab: Tab, label: String, symbol: String) -> some View {
