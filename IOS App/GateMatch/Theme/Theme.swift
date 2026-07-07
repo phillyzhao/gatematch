@@ -23,26 +23,56 @@ struct AppAppearanceModifier: ViewModifier {
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.system.rawValue
 
     func body(content: Content) -> some View {
-        content
-            .onAppear {
-                Self.applyWindowOverride(AppearanceMode(rawValue: appearanceRaw) ?? .system)
-            }
-            .onChange(of: appearanceRaw) {
-                Self.applyWindowOverride(AppearanceMode(rawValue: appearanceRaw) ?? .system)
-            }
+        content.background(
+            WindowStyleApplier(style: Self.uiStyle(for: AppearanceMode(rawValue: appearanceRaw) ?? .system))
+                .frame(width: 0, height: 0)
+                .allowsHitTesting(false)
+        )
+    }
+
+    static func uiStyle(for mode: AppearanceMode) -> UIUserInterfaceStyle {
+        switch mode {
+        case .system: .unspecified
+        case .light: .light
+        case .dark: .dark
+        }
     }
 
     static func applyWindowOverride(_ mode: AppearanceMode) {
-        let style: UIUserInterfaceStyle
-        switch mode {
-        case .system: style = .unspecified
-        case .light: style = .light
-        case .dark: style = .dark
-        }
+        let style = uiStyle(for: mode)
         for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
             for window in scene.windows {
                 window.overrideUserInterfaceStyle = style
             }
+        }
+    }
+}
+
+/// Grabs its hosting window the moment it's attached — the only reliable
+/// point to apply `overrideUserInterfaceStyle` at launch — and re-applies
+/// whenever the chosen style changes.
+private struct WindowStyleApplier: UIViewRepresentable {
+    let style: UIUserInterfaceStyle
+
+    func makeUIView(context: Context) -> WindowProbe {
+        WindowProbe()
+    }
+
+    func updateUIView(_ view: WindowProbe, context: Context) {
+        view.apply(style)
+    }
+
+    final class WindowProbe: UIView {
+        private var pendingStyle: UIUserInterfaceStyle = .unspecified
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            window?.overrideUserInterfaceStyle = pendingStyle
+        }
+
+        func apply(_ style: UIUserInterfaceStyle) {
+            pendingStyle = style
+            window?.overrideUserInterfaceStyle = style
         }
     }
 }
