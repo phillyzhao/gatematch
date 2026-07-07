@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 /// App shell: swipeable pages behind a floating glass navigation island
 /// (Events · Messages · Account) plus a detached map button.
@@ -116,6 +117,7 @@ struct MainShellView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Friends map, beta")
+        .popoverTip(MapTip(), arrowEdge: .bottom)
     }
 
     private func tabButton(_ tab: Tab, label: String, symbol: String) -> some View {

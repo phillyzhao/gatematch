@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 struct TravelerFeedView: View {
     @Environment(AppState.self) private var appState
@@ -34,6 +35,7 @@ struct TravelerFeedView: View {
     private var feedList: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
+                TipView(ConnectTip())
                 ForEach(appState.eventTravelers) { traveler in
                     TravelerCardView(
                         traveler: traveler,

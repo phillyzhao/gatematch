@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 /// The Events tab root: anyone can browse official events without an
 /// account. Tapping an event asks for sign-up first (if needed), then the code.
@@ -37,6 +38,7 @@ struct EventSelectionView: View {
                     } else {
                         header
                     }
+                    TipView(EventBadgeTip())
                     if filteredEvents.isEmpty {
                         ContentUnavailableView.search(text: searchText)
                             .padding(.top, 40)
@@ -101,6 +103,7 @@ struct EventSelectionView: View {
         .background(Capsule().fill(.ultraThinMaterial))
         .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08)))
         .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
+        .popoverTip(SearchTip(), arrowEdge: .top)
     }
 
     private func handleScroll(_ offset: CGFloat) {
