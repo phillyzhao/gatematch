@@ -43,7 +43,7 @@ struct FriendsMapView: View {
                 ForEach(pins) { pin in
                     Annotation("\(pin.profile.firstName) · \(pin.airportCode)", coordinate: pin.coordinate) {
                         AvatarView(profile: pin.profile, size: 36)
-                            .background(Circle().fill(.white).padding(-3))
+                            .background(Circle().fill(Color(.systemBackground)).padding(-3))
                     }
                 }
             }

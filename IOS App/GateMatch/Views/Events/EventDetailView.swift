@@ -66,12 +66,15 @@ struct EventDetailView: View {
         .sheet(isPresented: $showJoinSheet) {
             // No account yet → sign up first; the sheet then flows
             // straight into code entry for this event.
-            if appState.hasOnboarded {
-                EventJoinView(event: event)
-            } else {
-                OnboardingView()
-                    .presentationDetents([.large])
+            Group {
+                if appState.hasOnboarded {
+                    EventJoinView(event: event)
+                } else {
+                    OnboardingView()
+                        .presentationDetents([.large])
+                }
             }
+            .appAppearance()
         }
     }
 
@@ -99,7 +102,7 @@ struct EventDetailView: View {
                 .foregroundStyle(.white)
         }
         .frame(width: 34, height: 34)
-        .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+        .overlay(Circle().strokeBorder(Color(.systemBackground), lineWidth: 2))
         .accessibilityLabel("\(count) of your connections are going")
     }
 

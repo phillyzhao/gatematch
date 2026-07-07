@@ -15,6 +15,23 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
     }
 }
 
+/// Applies the user's chosen appearance. Sheets and full-screen covers don't
+/// reliably inherit `preferredColorScheme` from the root, so every
+/// presentation root applies this too — keeping dark mode consistent.
+struct AppAppearanceModifier: ViewModifier {
+    @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.system.rawValue
+
+    func body(content: Content) -> some View {
+        content.preferredColorScheme(AppearanceMode(rawValue: appearanceRaw)?.colorScheme)
+    }
+}
+
+extension View {
+    func appAppearance() -> some View {
+        modifier(AppAppearanceModifier())
+    }
+}
+
 enum Theme {
     /// GateMatch brand blue — strong and direct. Always used as a flat fill,
     /// never behind shadows, glows, or dimming overlays.

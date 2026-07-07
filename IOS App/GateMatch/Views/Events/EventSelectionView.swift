@@ -187,7 +187,7 @@ struct EventSelectionView: View {
                 .foregroundStyle(.white)
         }
         .frame(width: 34, height: 34)
-        .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+        .overlay(Circle().strokeBorder(Color(.systemBackground), lineWidth: 2))
         .accessibilityLabel("\(count) of your connections are going")
     }
 
