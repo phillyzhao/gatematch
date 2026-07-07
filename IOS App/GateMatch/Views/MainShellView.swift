@@ -89,7 +89,19 @@ struct MainShellView: View {
         .frame(maxWidth: .infinity)
     }
 
+    /// Tips show one at a time: the map tip waits until the events
+    /// badge tip has been dismissed.
+    @ViewBuilder
     private var mapButton: some View {
+        if EventBadgeTip().shouldDisplay {
+            mapButtonBase
+        } else {
+            mapButtonBase
+                .popoverTip(MapTip(), arrowEdge: .bottom)
+        }
+    }
+
+    private var mapButtonBase: some View {
         Button {
             showMap = true
         } label: {
@@ -117,7 +129,6 @@ struct MainShellView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Friends map, beta")
-        .popoverTip(MapTip(), arrowEdge: .bottom)
     }
 
     private func tabButton(_ tab: Tab, label: String, symbol: String) -> some View {
