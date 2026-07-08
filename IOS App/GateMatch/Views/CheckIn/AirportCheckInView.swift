@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AirportCheckInView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.dismiss) private var dismiss
 
     @State private var selectedAirport: Airport?
     @State private var airportQuery = ""
@@ -9,6 +10,7 @@ struct AirportCheckInView: View {
     @State private var gate = ""
     @State private var hasFlightTime = false
     @State private var flightTime = Date().addingTimeInterval(2 * 3600)
+    @State private var didLoad = false
 
     /// The event's primary airports lead; a selection made via search stays visible.
     private var suggestedAirports: [Airport] {
@@ -48,9 +50,31 @@ struct AirportCheckInView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Color(.systemGroupedBackground))
-        .navigationTitle("Check in")
+        .navigationTitle("Travel details")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Cancel") { dismiss() }
+            }
+        }
         .safeAreaInset(edge: .bottom) { checkInButton }
+        .onAppear {
+            guard !didLoad else { return }
+            didLoad = true
+            loadExisting()
+        }
+    }
+
+    /// Pre-fill from an existing check-in so this doubles as an edit screen.
+    private func loadExisting() {
+        guard let existing = appState.checkIn else { return }
+        selectedAirport = Airport.named(existing.airportCode)
+        terminal = existing.terminal
+        gate = existing.gate
+        if let flight = existing.flightTime {
+            hasFlightTime = true
+            flightTime = flight
+        }
     }
 
     private var airportSection: some View {
@@ -210,7 +234,7 @@ struct AirportCheckInView: View {
 
     private var checkInButton: some View {
         Button(action: checkIn) {
-            Text(selectedAirport.map { "Check in at \($0.code)" } ?? "Check in")
+            Text(selectedAirport.map { "Save · \($0.code)" } ?? "Save travel details")
                 .font(Theme.heading(17))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -233,6 +257,7 @@ struct AirportCheckInView: View {
             gate: gate.trimmingCharacters(in: .whitespaces).uppercased(),
             flightTime: hasFlightTime ? flightTime : nil
         )
+        dismiss()
     }
 }
 
@@ -240,5 +265,5 @@ struct AirportCheckInView: View {
     NavigationStack {
         AirportCheckInView()
     }
-    .environment(AppState())
+    .environment(AppState.preview)
 }

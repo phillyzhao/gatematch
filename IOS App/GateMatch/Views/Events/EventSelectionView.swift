@@ -106,7 +106,7 @@ struct EventSelectionView: View {
                     Text(event.name)
                         .font(.headline)
                         .foregroundStyle(.primary)
-                    Text(appState.isCheckedIn ? "Tap to meet travelers" : "Tap to check in at your airport")
+                    Text("Tap to see who's going")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

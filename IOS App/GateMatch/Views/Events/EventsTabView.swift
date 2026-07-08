@@ -4,6 +4,7 @@ import SwiftUI
 struct EventHomeRoute: Hashable {}
 
 struct EventsTabView: View {
+    @Environment(AppState.self) private var appState
     @Binding var path: NavigationPath
 
     var body: some View {
@@ -13,19 +14,23 @@ struct EventsTabView: View {
                     EventHomeView()
                 }
         }
+        // Joining drops you straight into the guest list; leaving returns
+        // to the browser.
+        .onChange(of: appState.joinedEvent?.id) { _, newID in
+            if newID != nil {
+                path.append(EventHomeRoute())
+            } else {
+                path = NavigationPath()
+            }
+        }
     }
 }
 
-/// Inside the joined event: check in first, then meet travelers.
+/// Inside the joined event: meet the people going. Travel details are optional
+/// and added from here — never a gate you must clear first.
 struct EventHomeView: View {
-    @Environment(AppState.self) private var appState
-
     var body: some View {
-        if appState.isCheckedIn {
-            TravelerFeedView()
-        } else {
-            AirportCheckInView()
-        }
+        TravelerFeedView()
     }
 }
 
