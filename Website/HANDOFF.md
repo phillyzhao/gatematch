@@ -61,6 +61,8 @@ Ship `index.html` + `css/` + `js/` + `assets/vendor/`. `gate.jpg` and the two le
 
 **Cache-busting:** `main.css` and `main.js` are referenced with `?v=N`. **Bump `N` in `index.html` whenever you edit those files** or a browser (and the Claude_Preview tab) will serve a stale cached copy — this bit me during the build.
 
+**Loading performance (CONSTRAINT — don't undo):** the Google Fonts CSS is loaded **non-render-blocking** (`<link rel="preload" as="style" onload="this.rel='stylesheet'">` + `<noscript>` fallback), and `three.module.min.js` has a `<link rel="modulepreload">` (with `preload as="script"` for gsap/ScrollTrigger). **Why:** the fonts stylesheet was a render-blocking request that measured ~740 ms and, because it blocks module execution, delayed the 655 KB three.js download from starting until ~790 ms → ~1 s blank load. With these two changes three.js starts downloading at ~40 ms in parallel and nothing waits on the fonts. Do NOT switch the font `<link>` back to a plain `rel="stylesheet"` in the head. The preloader also caps its font wait (1 s) so slow fonts can't stall the lap. Note: three.js is 655 KB **uncompressed** — fine on localhost (14 ms) and on any host that gzip/brotli-compresses static assets (→ ~170 KB); the bundled python `serve.sh` does NOT compress, so a slow *deployed* load usually means the host isn't compressing.
+
 ---
 
 ## 4. How to run  ← important

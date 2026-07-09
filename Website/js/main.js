@@ -54,6 +54,7 @@ window.__intro = introTl;
   window.addEventListener('load', () => { loaded = true; target = Math.max(target, 0.9); }, { once: true });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fontsDone = true; }).catch(() => { fontsDone = true; });
   else fontsDone = true;
+  setTimeout(() => { fontsDone = true; }, 1000);   // fonts are non-blocking — never let them stall the lap
 
   function finish() {
     if (finished) return; finished = true;
