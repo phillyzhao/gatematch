@@ -21,6 +21,27 @@
 <link rel="preload" as="script" href="assets/vendor/gsap.min.js" />
 <link rel="preload" as="script" href="assets/vendor/ScrollTrigger.min.js" />
 <link rel="stylesheet" href="css/main.css?v=7" />
+<script>
+/* file:// guard — this site loads three.js as an ES module + import map, which
+   browsers block on file:// (origin "null"), so the app can't boot and the
+   loader would hang forever. Detect it and show a clear instruction instead.
+   Classic (non-module) inline script, so it still runs on file://. */
+(function () {
+  if (location.protocol !== 'file:') return;
+  addEventListener('DOMContentLoaded', function () {
+    var pre = document.getElementById('preloader');
+    if (!pre) return;
+    var rotor = document.getElementById('plRotor');
+    if (rotor) rotor.style.opacity = '.2';
+    var sub = pre.querySelector('.pl-sub');
+    if (sub) { sub.textContent = 'Open it over a local server'; sub.style.color = '#7E9BF7'; }
+    var hint = document.createElement('p');
+    hint.style.cssText = 'margin-top:16px;max-width:360px;text-align:center;font-size:.9rem;line-height:1.55;color:#9DB4C0;padding:0 22px';
+    hint.innerHTML = 'This page must be served over http, not opened as a file. In the <b style="color:#ECF4F7">Website</b> folder run <b style="color:#ECF4F7">./serve.sh</b> (or <b style="color:#ECF4F7">python3 -m http.server</b>) and open the printed <b style="color:#ECF4F7">localhost</b> URL.';
+    pre.appendChild(hint);
+  });
+})();
+</script>
 </head>
 <body>
 
