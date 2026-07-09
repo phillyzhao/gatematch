@@ -223,7 +223,8 @@ function initJourney() {
   const gate = (function gateSet() {
     const grp = new THREE.Group(); scene.add(grp);
     // glowing glass wall
-    const glass = new THREE.Mesh(new THREE.PlaneGeometry(130, 13), new THREE.MeshBasicMaterial({ color: 0x0e1728 }));
+    const glass = new THREE.Mesh(new THREE.PlaneGeometry(130, 13),
+      new THREE.MeshBasicMaterial({ color: 0x1b2b4a, transparent: true, opacity: .24, depthWrite: false, side: THREE.DoubleSide }));
     glass.position.set(0, 6.5, -119.6); grp.add(glass);
     const roof = new THREE.Mesh(new THREE.BoxGeometry(134, .7, 1.4), new THREE.MeshBasicMaterial({ color: 0x080d16 }));
     roof.position.set(0, 13.3, -119.3); grp.add(roof);
@@ -296,7 +297,7 @@ function initJourney() {
     const postR = new THREE.Mesh(post, frameMat); postR.position.set(DW / 2 + .12, DH / 2, DZ);
     const lintel = new THREE.Mesh(new THREE.BoxGeometry(DW + .6, .24, .24), frameMat); lintel.position.set(0, DH + .12, DZ);
     grp.add(postL, postR, lintel);
-    const panelMat = new THREE.MeshBasicMaterial({ color: 0x0c1522 });
+    const panelMat = new THREE.MeshBasicMaterial({ color: 0xacc6ff, transparent: true, opacity: .2, depthWrite: false, side: THREE.DoubleSide });
     const panelGeo = new THREE.BoxGeometry(DW / 2, DH, .16);
     const panelL = new THREE.Mesh(panelGeo, panelMat); panelL.position.set(-DW / 4, DH / 2, DZ);
     const panelR = new THREE.Mesh(panelGeo, panelMat); panelR.position.set(DW / 4, DH / 2, DZ);
@@ -335,7 +336,8 @@ function initJourney() {
     let placed = 0, guard = 0;
     while (placed < nB && guard++ < 4000) {
       const x = -88 + Math.random() * 176, z = -270 - Math.random() * 84;
-      if (Math.hypot(x - VENUE.x, z - VENUE.z) < 9) continue;
+      if (Math.hypot(x - VENUE.x, z - VENUE.z) < 15) continue;          // open plaza around the venue
+      if (Math.abs(x - VENUE.x) < 15 && z > VENUE.z) continue;          // clear the approach corridor so nothing occludes it
       const central = 1 - Math.min(1, Math.abs(x) / 88);
       d.position.set(x, 0, z);
       d.scale.set(2.4 + Math.random() * 2.4, 1.6 + Math.random() * (4 + central * 11), 2.4 + Math.random() * 2.4);
@@ -345,9 +347,12 @@ function initJourney() {
     // city window lights
     const nL = 720, lp = new Float32Array(nL * 3);
     for (let i = 0; i < nL; i++) {
-      lp[i * 3] = -88 + Math.random() * 176;
+      let lx, lz, g = 0;
+      do { lx = -88 + Math.random() * 176; lz = -270 - Math.random() * 84; }
+      while (Math.abs(lx - VENUE.x) < 15 && lz > VENUE.z && g++ < 8);   // keep the approach corridor dark/clear
+      lp[i * 3] = lx;
       lp[i * 3 + 1] = .5 + Math.random() * 12;
-      lp[i * 3 + 2] = -270 - Math.random() * 84;
+      lp[i * 3 + 2] = lz;
     }
     const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(lp, 3));
     grp.add(new THREE.Points(lg, new THREE.PointsMaterial({ color: 0x9fb8ff, size: 1.9, sizeAttenuation: false, transparent: true, opacity: .7, depthWrite: false })));
@@ -495,7 +500,7 @@ function initJourney() {
     const dOpen = clamp01(proxy.door);
     gate.door.panelL.position.x = -gate.door.quarterW - dOpen * gate.door.travel;
     gate.door.panelR.position.x = gate.door.quarterW + dOpen * gate.door.travel;
-    gate.door.glow.material.opacity = dOpen * .6;
+    gate.door.glow.material.opacity = dOpen * .22;
 
     route.set(proxy.route);
 
