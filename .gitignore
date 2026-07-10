@@ -8,3 +8,5 @@ build/
 .idea/
 *.log
 .claude/settings.local.json
+xcuserdata/
+DerivedData/
