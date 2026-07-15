@@ -1,41 +1,35 @@
 import Foundation
 import Observation
 
-enum Proximity: Int, Comparable {
-    case sameGate = 0
-    case sameTerminal
-    case sameAirport
-    case elsewhere
-
-    static func < (lhs: Proximity, rhs: Proximity) -> Bool {
-        lhs.rawValue < rhs.rawValue
-    }
+/// Where a connection was made — the city pin they appear at on the map.
+struct ConnectionPlace: Equatable {
+    let cityLabel: String
+    let latitude: Double
+    let longitude: Double
 }
 
 /// Single source of truth for the local-only prototype.
 /// No networking — everything lives in memory, seeded from MockData.
+/// V2: discovery is location-based (Connect map), not event-based.
 @Observable
 @MainActor
 final class AppState {
     // MARK: Current user
     var currentUser: UserProfile?
-    /// The official event the user has joined with its code. Gates travel info.
-    var joinedEvent: Event?
-    var checkIn: AirportCheckIn?
 
     // MARK: Mock world
+    /// Everyone the app knows about: legacy mock travelers (existing chats,
+    /// previews) plus the Connect-map nearby people.
     let travelers: [UserProfile]
-    let travelerCheckIns: [UUID: AirportCheckIn]
-    let events: [Event]
-    /// Which event each mock traveler is attending.
-    let travelerEventIDs: [UUID: UUID]
-    /// Travelers who already asked to meet the current user (mock).
+    /// People who already asked to meet the current user (mock) —
+    /// adding them back creates an instant connection.
     let incomingRequests: Set<UUID>
 
     // MARK: Interactions
     var requestedIDs: Set<UUID> = []
-    var skippedIDs: Set<UUID> = []
     var connections: [Connection] = []
+    /// Where each connection was made, for the friends map.
+    var connectionPlaces: [UUID: ConnectionPlace] = [:]
     /// Chat threads keyed by connection ID.
     var messages: [UUID: [ChatMessage]] = [:]
     var blockedIDs: Set<UUID> = []
@@ -45,20 +39,12 @@ final class AppState {
     var botMessages: [ChatMessage] = [HelperBot.greeting]
 
     var hasOnboarded: Bool { currentUser != nil }
-    var hasJoinedEvent: Bool { joinedEvent != nil }
-    var isCheckedIn: Bool { checkIn != nil }
 
     init(
-        travelers: [UserProfile] = MockData.travelers,
-        travelerCheckIns: [UUID: AirportCheckIn] = MockData.travelerCheckIns,
-        events: [Event] = MockData.events,
-        travelerEventIDs: [UUID: UUID] = MockData.travelerEventIDs,
-        incomingRequests: Set<UUID> = MockData.incomingRequests
+        travelers: [UserProfile] = MockData.travelers + MockPeople.profiles,
+        incomingRequests: Set<UUID> = MockData.incomingRequests.union(MockPeople.instantConnectIDs)
     ) {
         self.travelers = travelers
-        self.travelerCheckIns = travelerCheckIns
-        self.events = events
-        self.travelerEventIDs = travelerEventIDs
         self.incomingRequests = incomingRequests
     }
 
@@ -66,74 +52,19 @@ final class AppState {
         travelers.first { $0.id == id }
     }
 
-    // MARK: Events
+    // MARK: Connecting
 
-    func attendeeCount(for event: Event) -> Int {
-        travelerEventIDs.values.filter { $0 == event.id }.count
-    }
-
-    /// How many of the user's connections are attending the given event.
-    func connectionsAttending(_ event: Event) -> Int {
-        connections
-            .filter {
-                travelerEventIDs[$0.travelerID] == event.id
-                    && !blockedIDs.contains($0.travelerID)
-            }
-            .count
-    }
-
-    /// Leaving an event also clears travel info — it was scoped to that trip.
-    func leaveEvent() {
-        joinedEvent = nil
-        checkIn = nil
-    }
-
-    // MARK: Feed
-
-    /// Attendees of the joined event whom the user hasn't acted on.
-    /// The event is the filter; airport proximity only affects sort order.
-    var eventTravelers: [UserProfile] {
-        guard let joinedEvent else { return [] }
-        return travelers
-            .filter { traveler in
-                traveler.id != currentUser?.id
-                    && travelerEventIDs[traveler.id] == joinedEvent.id
-                    && !requestedIDs.contains(traveler.id)
-                    && !skippedIDs.contains(traveler.id)
-                    && !blockedIDs.contains(traveler.id)
-            }
-            .sorted {
-                (proximity(of: $0).rawValue, $0.firstName) < (proximity(of: $1).rawValue, $1.firstName)
-            }
-    }
-
-    /// How close another traveler is right now — informational only, never a filter.
-    func proximity(of traveler: UserProfile) -> Proximity {
-        guard let checkIn,
-              let theirs = travelerCheckIns[traveler.id],
-              theirs.airportCode == checkIn.airportCode
-        else { return .elsewhere }
-        if theirs.terminal == checkIn.terminal {
-            if !checkIn.gate.isEmpty && theirs.gate == checkIn.gate { return .sameGate }
-            return .sameTerminal
-        }
-        return .sameAirport
-    }
-
-    /// Asks to meet a traveler. If they already asked too (mock), you're connected.
+    /// Asks to meet someone. If they already asked too (mock), you're connected.
     @discardableResult
-    func connect(with traveler: UserProfile) -> Connection? {
-        requestedIDs.insert(traveler.id)
-        guard incomingRequests.contains(traveler.id) else { return nil }
-        let connection = Connection(travelerID: traveler.id)
+    func connect(with person: UserProfile, place: ConnectionPlace? = nil) -> Connection? {
+        requestedIDs.insert(person.id)
+        if let place { connectionPlaces[person.id] = place }
+        guard incomingRequests.contains(person.id) else { return nil }
+        let connection = Connection(travelerID: person.id)
         connections.append(connection)
-        messages[connection.id] = [MockData.greeting(from: traveler, connectionID: connection.id)]
+        messages[connection.id] = [MockData.greeting(from: person, connectionID: connection.id)]
         pendingCelebration = connection
         return connection
-    }
-
-    func skip(_ traveler: UserProfile) {
-        skippedIDs.insert(traveler.id)
     }
 
     // MARK: Chat
@@ -164,21 +95,16 @@ final class AppState {
         }
     }
 
-    /// Fully set-up state for SwiftUI previews: onboarded, event joined, checked in at ORD.
+    /// Fully set-up state for SwiftUI previews: onboarded, one connection
+    /// made from the Connect map in Chicago.
     static var preview: AppState {
         let state = AppState()
         state.currentUser = MockData.previewUser
-        state.joinedEvent = MockData.events.first
-        state.checkIn = AirportCheckIn(
-            userID: MockData.previewUser.id,
-            airportCode: "ORD",
-            terminal: "Terminal 1",
-            gate: "B12",
-            flightTime: .now.addingTimeInterval(90 * 60)
-        )
-        // One existing connection with a greeting so Connections/Chat previews have content.
-        if let maya = state.travelers.first {
-            state.connect(with: maya)
+        if let tessa = MockPeople.profiles.first {
+            state.connect(
+                with: tessa,
+                place: ConnectionPlace(cityLabel: "Chicago, IL", latitude: 41.9, longitude: -87.65)
+            )
             state.pendingCelebration = nil
         }
         return state

@@ -35,6 +35,19 @@ enum MockPeople {
         UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", 100 + n))!
     }
 
+    /// All nearby-people profiles, for seeding AppState's people directory.
+    static var profiles: [UserProfile] { pool.map(\.profile) }
+
+    /// Nearby people who already asked to meet the current user (mock) —
+    /// adding them creates an instant connection with a greeting message.
+    static let instantConnectIDs: Set<UUID> = [
+        uuid(1),  // Tessa
+        uuid(4),  // Chris
+        uuid(8),  // Diego
+        uuid(11), // Monica
+        uuid(12), // Ben
+    ]
+
     private static let pool: [(profile: UserProfile, relationship: String)] = [
         (UserProfile(id: uuid(1), firstName: "Tessa", age: 27, travelPurpose: .leisure,
                      bio: "Weekend hiker, weekday designer.", showsExactGate: false),

@@ -16,9 +16,9 @@ struct NotificationsView: View {
     /// Mock alerts for the local prototype.
     private let notifications: [AppNotification] = [
         AppNotification(
-            symbol: "checkmark.seal.fill",
-            title: "Event code accepted",
-            detail: "You joined an event with a verified registration code.",
+            symbol: "person.crop.circle.badge.checkmark",
+            title: "Profile created",
+            detail: "Your GateMatch profile is ready — people you add can now see it.",
             timeAgo: "2h"
         ),
         AppNotification(

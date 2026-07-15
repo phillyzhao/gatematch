@@ -90,7 +90,7 @@ enum Theme {
 
     // MARK: Brand fonts (bundled, registered at launch)
 
-    /// Big display moments: celebration titles, event names on detail pages.
+    /// Big display moments: celebration titles and other hero text.
     static func display(_ size: CGFloat) -> Font {
         .custom("Montserrat-Bold", size: size)
     }

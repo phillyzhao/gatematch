@@ -20,12 +20,12 @@ struct ConnectionsView: View {
 
             if visibleConnections.isEmpty {
                 Section {
-                    Text("When you and another attendee both want to meet, your chat starts here.")
+                    Text("When you and someone you add both want to meet, your chat starts here.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
             } else {
-                Section("Travelers") {
+                Section("People") {
                     ForEach(visibleConnections) { connection in
                         if let traveler = appState.traveler(withID: connection.travelerID) {
                             NavigationLink(value: connection) {

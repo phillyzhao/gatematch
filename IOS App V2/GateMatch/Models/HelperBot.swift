@@ -20,34 +20,29 @@ enum HelperBot {
 
     static let faqs: [FAQ] = [
         FAQ(
-            question: "How do I join an event?",
-            answer: "Open an event from the Events tab and tap the plus button. Enter the registration code from your event confirmation email. For this demo, try MTS2026 for the Midwest Tech Summit.",
-            keywords: ["join", "code", "register", "sign up", "passcode", "event"]
+            question: "How do I find people near me?",
+            answer: "Open the Connect tab and type your city into the search bar. People you may know — friends of friends, mutuals, and contacts — pop up on the map. Tap the list button in the top right to see them as a list.",
+            keywords: ["find", "people", "near", "location", "city", "search", "map"]
         ),
         FAQ(
-            question: "What does Connect do?",
-            answer: "Connect sends a request to meet another attendee. If they want to meet too, you're connected and can chat here in Messages. Skipping someone is never shown to them.",
-            keywords: ["connect", "skip", "match", "meet", "request"]
+            question: "What does the plus button do?",
+            answer: "The plus sends a request to connect. If they want to connect too, you're matched and can chat here in Messages. Requests you send are never shown publicly.",
+            keywords: ["plus", "add", "connect", "match", "meet", "request"]
         ),
         FAQ(
-            question: "Who can see my gate?",
-            answer: "Nobody — unless you turn on \"Show my exact gate\" in Account → Settings → Privacy. Other travelers only ever see your terminal, and your exact location is never shared.",
-            keywords: ["gate", "privacy", "location", "see me", "terminal"]
-        ),
-        FAQ(
-            question: "How do I check in at my airport?",
-            answer: "After joining an event, open it from the Events tab and choose your airport, terminal, and gate. No GPS — you enter it yourself.",
-            keywords: ["check in", "checkin", "airport", "flight"]
+            question: "Why is it US-only?",
+            answer: "This version of GateMatch is a US-only research build — search works for US cities and states. More countries are planned for a later release.",
+            keywords: ["us", "usa", "country", "international", "abroad", "london", "only"]
         ),
         FAQ(
             question: "How do I block or report someone?",
-            answer: "Open their profile and tap the ••• menu in the top corner. Blocked travelers disappear from your feed and messages; you can unblock them in Account → Settings → Safety.",
+            answer: "Open their chat and tap the ••• menu in the top corner. Blocked people disappear from your map and messages; you can unblock them in Account → Settings → Safety.",
             keywords: ["block", "report", "safety", "unblock", "harass"]
         ),
         FAQ(
             question: "What is the Friends Map?",
-            answer: "A beta feature — the globe button at the bottom right opens a world map showing where your connections are checked in. Meet-up spots, ride splitting, and gate view are coming later.",
-            keywords: ["map", "globe", "friends", "beta", "world"]
+            answer: "A beta feature — the map button at the bottom right shows your connections pinned to the cities where you met them. Meet-up spots and shared plans are coming later.",
+            keywords: ["map", "friends", "beta", "world", "pins"]
         ),
     ]
 

@@ -2,17 +2,16 @@ import SwiftUI
 import TipKit
 
 /// App shell: swipeable pages behind a floating glass navigation island
-/// (Connect · Events · Messages · Account) plus a detached map button.
+/// (Connect · Messages · Account) plus a detached map button.
 struct MainShellView: View {
     @Environment(AppState.self) private var appState
 
     enum Tab: Hashable {
-        case connect, events, messages, account
+        case connect, messages, account
     }
 
     /// V2 opens on the globe — Connect is the research build's front door.
     @State private var selection: Tab = .connect
-    @State private var eventsPath = NavigationPath()
     @State private var messagesPath = NavigationPath()
     @State private var accountPath = NavigationPath()
     @State private var showMap = false
@@ -21,7 +20,6 @@ struct MainShellView: View {
     private var isBarHidden: Bool {
         switch selection {
         case .connect: false
-        case .events: !eventsPath.isEmpty
         case .messages: !messagesPath.isEmpty
         case .account: !accountPath.isEmpty
         }
@@ -33,9 +31,6 @@ struct MainShellView: View {
             TabView(selection: $selection) {
                 ConnectView()
                     .tag(Tab.connect)
-
-                EventsTabView(path: $eventsPath)
-                    .tag(Tab.events)
 
                 NavigationStack(path: $messagesPath) {
                     ConnectionsView()
@@ -81,7 +76,6 @@ struct MainShellView: View {
         HStack(spacing: 12) {
             HStack(spacing: 0) {
                 tabButton(.connect, label: "Connect", symbol: "globe.americas.fill")
-                tabButton(.events, label: "Events", symbol: "calendar")
                 tabButton(.messages, label: "Messages", symbol: "bubble.left.and.bubble.right.fill")
                 tabButton(.account, label: "Account", symbol: "person.crop.circle.fill")
             }
@@ -95,30 +89,18 @@ struct MainShellView: View {
         .frame(maxWidth: .infinity)
     }
 
-    /// Tips show one at a time: the map tip waits until the events
-    /// badge tip has been dismissed.
-    @ViewBuilder
     private var mapButton: some View {
-        if EventBadgeTip().shouldDisplay {
-            mapButtonBase
-        } else {
-            mapButtonBase
-                .popoverTip(MapTip(), arrowEdge: .bottom)
-        }
-    }
-
-    private var mapButtonBase: some View {
         Button {
             showMap = true
         } label: {
             VStack(spacing: 3) {
-                // The globe now belongs to the Connect tab; the friends map gets map.fill.
+                // The globe belongs to the Connect tab; the friends map gets map.fill.
                 Image(systemName: "map.fill")
                     .font(.system(size: 17, weight: .semibold))
                 Text("Map")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.caption2.weight(.medium))
             }
-            .frame(width: 62, height: 48)
+            .frame(width: 72, height: 48)
             .foregroundStyle(Color.secondary)
             .background(Capsule().fill(.ultraThinMaterial))
             .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08)))
@@ -135,6 +117,7 @@ struct MainShellView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .popoverTip(MapTip(), arrowEdge: .bottom)
         .accessibilityLabel("Friends map, beta")
     }
 
@@ -146,10 +129,9 @@ struct MainShellView: View {
                 Image(systemName: symbol)
                     .font(.system(size: 17, weight: .semibold))
                 Text(label)
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.caption2.weight(.medium))
             }
-            // 62pt keeps four tabs + the map button inside the island row.
-            .frame(width: 62, height: 48)
+            .frame(width: 72, height: 48)
             .foregroundStyle(selection == tab ? Theme.brand : Color.secondary)
             .contentShape(Rectangle())
         }
@@ -158,12 +140,12 @@ struct MainShellView: View {
     }
 }
 
-#Preview("Browsing") {
+#Preview("Fresh") {
     MainShellView()
         .environment(AppState())
 }
 
-#Preview("Joined") {
+#Preview("Connected") {
     MainShellView()
         .environment(AppState.preview)
 }

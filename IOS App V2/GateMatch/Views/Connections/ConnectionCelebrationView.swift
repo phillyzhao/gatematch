@@ -20,7 +20,7 @@ struct ConnectionCelebrationView: View {
             VStack(spacing: 8) {
                 Text("You're connected!")
                     .font(Theme.display(32))
-                Text("You and \(traveler.firstName) both want to meet. Say hi before boarding.")
+                Text("You and \(traveler.firstName) both want to meet. Say hi and make a plan.")
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .opacity(0.85)

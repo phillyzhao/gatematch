@@ -29,12 +29,12 @@ struct OnboardingView: View {
 
     private var header: some View {
         VStack(spacing: 8) {
-            Image(systemName: "airplane.departure")
+            Image(systemName: "person.2.wave.2.fill")
                 .font(.system(size: 40))
                 .foregroundStyle(Theme.brand)
             Text("Create your profile")
                 .font(Theme.display(26))
-            Text("You need a profile to join events and meet fellow attendees.")
+            Text("You need a profile before you can connect with people near you.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

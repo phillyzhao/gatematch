@@ -5,6 +5,8 @@ import SwiftUI
 /// A valid US location zooms the camera in and pops mock people nearby;
 /// anything outside the USA is turned away.
 struct ConnectView: View {
+    @Environment(AppState.self) private var appState
+
     private enum Phase: Equatable {
         case globe
         case zoomed(USCity)
@@ -32,8 +34,11 @@ struct ConnectView: View {
     @State private var people: [NearbyPerson] = []
     /// Drives the staggered pop-in of person pins after the zoom lands.
     @State private var visibleIDs: Set<UUID> = []
-    @State private var addedIDs: Set<UUID> = []
     @State private var showList = false
+    /// Adding someone requires a profile; the tapped person waits here
+    /// while the onboarding sheet is up.
+    @State private var pendingAdd: NearbyPerson?
+    @State private var showOnboarding = false
     @FocusState private var searchFocused: Bool
 
     private var zoomedCity: USCity? {
@@ -60,6 +65,12 @@ struct ConnectView: View {
         .ignoresSafeArea()
         .overlay(alignment: .top) { header }
         .sheet(isPresented: $showList) { peopleList }
+        .sheet(isPresented: $showOnboarding, onDismiss: finishPendingAdd) {
+            OnboardingView()
+        }
+        .onChange(of: appState.hasOnboarded) { _, onboarded in
+            if onboarded && showOnboarding { showOnboarding = false }
+        }
         .onTapGesture { searchFocused = false }
         .task { await runAutomationHookIfNeeded() }
     }
@@ -183,10 +194,10 @@ struct ConnectView: View {
     }
 
     private func addButton(for person: NearbyPerson, size: CGFloat) -> some View {
-        let added = addedIDs.contains(person.id)
+        let added = appState.requestedIDs.contains(person.id)
         return Button {
             withAnimation(.snappy(duration: 0.2)) {
-                if added { addedIDs.remove(person.id) } else { addedIDs.insert(person.id) }
+                handleAdd(person)
             }
         } label: {
             Image(systemName: added ? "checkmark" : "plus")
@@ -197,7 +208,57 @@ struct ConnectView: View {
                 .overlay(Circle().strokeBorder(Color(.systemBackground), lineWidth: 1.5))
         }
         .buttonStyle(.plain)
+        .disabled(added)
         .accessibilityLabel(added ? "Added \(person.profile.firstName)" : "Add \(person.profile.firstName)")
+    }
+
+    // MARK: Adding people
+
+    /// Requests to connect. First add ever routes through profile creation;
+    /// mutuals (mock incoming requests) connect back instantly.
+    private func handleAdd(_ person: NearbyPerson) {
+        guard !appState.requestedIDs.contains(person.id) else { return }
+        guard appState.hasOnboarded else {
+            pendingAdd = person
+            showOnboarding = true
+            return
+        }
+        // If a celebration sheet is about to appear, get the list sheet
+        // out of the way first — two presentations at once fail silently.
+        if showList && appState.incomingRequests.contains(person.id) {
+            showList = false
+            connectAfterDismiss(person)
+        } else {
+            performConnect(person)
+        }
+    }
+
+    private func finishPendingAdd() {
+        guard let person = pendingAdd else { return }
+        pendingAdd = nil
+        if appState.hasOnboarded {
+            connectAfterDismiss(person)
+        }
+    }
+
+    private func connectAfterDismiss(_ person: NearbyPerson) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(500))
+            performConnect(person)
+        }
+    }
+
+    private func performConnect(_ person: NearbyPerson) {
+        guard let city = zoomedCity else { return }
+        let coordinate = person.coordinate(around: city.coordinate)
+        appState.connect(
+            with: person.profile,
+            place: ConnectionPlace(
+                cityLabel: city.label,
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude
+            )
+        )
     }
 
     // MARK: List view
@@ -271,11 +332,16 @@ struct ConnectView: View {
         }
     }
 
-    /// Debug-only demo/verification hook: launch with CONNECT_AUTOZOOM=<city>
-    /// (and optionally CONNECT_AUTOLIST=1) to drive the flow hands-free.
+    /// Debug-only demo/verification hook, driven by launch environment:
+    /// CONNECT_AUTOZOOM=<city> searches hands-free, CONNECT_AUTOLIST=1 opens
+    /// the list, CONNECT_AUTOPROFILE=1 skips onboarding, CONNECT_AUTOADD=1
+    /// adds a person who connects back (exercising the celebration).
     private func runAutomationHookIfNeeded() async {
         #if DEBUG
         let env = ProcessInfo.processInfo.environment
+        if env["CONNECT_AUTOPROFILE"] == "1", !appState.hasOnboarded {
+            appState.currentUser = MockData.previewUser
+        }
         guard let autoCity = env["CONNECT_AUTOZOOM"], phase == .globe else { return }
         try? await Task.sleep(for: .seconds(1))
         query = autoCity
@@ -283,6 +349,12 @@ struct ConnectView: View {
         if env["CONNECT_AUTOLIST"] == "1" {
             try? await Task.sleep(for: .seconds(4))
             showList = true
+        }
+        if env["CONNECT_AUTOADD"] == "1" {
+            try? await Task.sleep(for: .seconds(4.5))
+            if let target = people.first(where: { appState.incomingRequests.contains($0.id) }) ?? people.first {
+                handleAdd(target)
+            }
         }
         #endif
     }

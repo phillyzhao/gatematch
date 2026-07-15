@@ -39,24 +39,15 @@ struct AccountView: View {
                     Text("Name, email, age, and bio.")
                 }
 
-                if let event = appState.joinedEvent {
-                    Section("Your event") {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(event.name)
-                                .font(.headline)
-                            Text("\(event.organizer) · \(event.city)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.vertical, 2)
-                    }
+                Section("Your connections") {
+                    LabeledContent("Connected", value: "\(appState.connections.count)")
                 }
             } else {
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Browsing as guest")
                             .font(.headline)
-                        Text("Join an event from the Events tab to create your traveler profile.")
+                        Text("Add someone from the Connect tab to create your profile and start chatting.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }

@@ -1,39 +1,29 @@
 import MapKit
 import SwiftUI
 
-/// Beta: a world map showing where your connections are checked in.
-/// Later: pick meet-up spots, split rides, see friends' gates.
+/// Beta: a map showing where your connections are, pinned to the city
+/// where you met them. Later: meet-up spots, plans, shared maps.
 struct FriendsMapView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
 
-    private static let airportCoordinates: [String: CLLocationCoordinate2D] = [
-        "ORD": .init(latitude: 41.9742, longitude: -87.9073),
-        "JFK": .init(latitude: 40.6413, longitude: -73.7781),
-        "LAX": .init(latitude: 33.9416, longitude: -118.4085),
-        "ATL": .init(latitude: 33.6407, longitude: -84.4277),
-    ]
-
     private struct FriendPin: Identifiable {
         let id: UUID
         let profile: UserProfile
-        let airportCode: String
-        let coordinate: CLLocationCoordinate2D
+        let place: ConnectionPlace
+
+        var coordinate: CLLocationCoordinate2D {
+            .init(latitude: place.latitude, longitude: place.longitude)
+        }
     }
 
     private var pins: [FriendPin] {
         appState.connections.compactMap { connection in
             guard let profile = appState.traveler(withID: connection.travelerID),
                   !appState.blockedIDs.contains(profile.id),
-                  let checkIn = appState.travelerCheckIns[profile.id],
-                  let coordinate = Self.airportCoordinates[checkIn.airportCode]
+                  let place = appState.connectionPlaces[profile.id]
             else { return nil }
-            return FriendPin(
-                id: profile.id,
-                profile: profile,
-                airportCode: checkIn.airportCode,
-                coordinate: coordinate
-            )
+            return FriendPin(id: profile.id, profile: profile, place: place)
         }
     }
 
@@ -41,7 +31,7 @@ struct FriendsMapView: View {
         ZStack {
             Map {
                 ForEach(pins) { pin in
-                    Annotation("\(pin.profile.firstName) · \(pin.airportCode)", coordinate: pin.coordinate) {
+                    Annotation("\(pin.profile.firstName) · \(pin.place.cityLabel)", coordinate: pin.coordinate) {
                         AvatarView(profile: pin.profile, size: 36)
                             .background(Circle().fill(Color(.systemBackground)).padding(-3))
                     }
@@ -89,14 +79,14 @@ struct FriendsMapView: View {
             if pins.isEmpty {
                 Text("No connections on the map yet")
                     .font(.subheadline.weight(.semibold))
-                Text("Connect with travelers at your event and they'll appear here at their airport.")
+                Text("Add people from the Connect tab — once you're connected, they'll appear here in their city.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
-                Text("\(pins.count) connection\(pins.count == 1 ? "" : "s") traveling now")
+                Text("\(pins.count) connection\(pins.count == 1 ? "" : "s") on the map")
                     .font(.subheadline.weight(.semibold))
             }
-            Text("Coming soon: pick meet-up spots, split rides, and see friends' gates.")
+            Text("Coming soon: meet-up spots, plans, and shared maps with friends.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

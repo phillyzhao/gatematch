@@ -12,7 +12,7 @@ struct RootView: View {
         .environment(AppState())
 }
 
-#Preview("Event joined") {
+#Preview("Connected") {
     RootView()
         .environment(AppState.preview)
 }
