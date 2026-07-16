@@ -39,6 +39,9 @@ struct ConnectView: View {
     /// while the onboarding sheet is up.
     @State private var pendingAdd: NearbyPerson?
     @State private var showOnboarding = false
+    /// Refreshed continuously while the camera moves so the overlay pins
+    /// (drawn outside the tinted map layer) track their coordinates.
+    @State private var cameraContext: MapCameraUpdateContext?
     @FocusState private var searchFocused: Bool
 
     private var zoomedCity: USCity? {
@@ -47,21 +50,20 @@ struct ConnectView: View {
     }
 
     var body: some View {
-        Map(position: $position, bounds: zoomedCity == nil ? nil : Self.usBounds) {
-            if let city = zoomedCity {
-                ForEach(people) { person in
-                    Annotation(coordinate: person.coordinate(around: city.coordinate)) {
-                        if visibleIDs.contains(person.id) {
-                            personPin(person)
-                                .transition(.scale(scale: 0.3).combined(with: .opacity))
-                        }
-                    } label: {
-                        EmptyView()
-                    }
+        // Techy monotone: the map renders grayscale and is multiplied by the
+        // slate tone, so land, water, and roads become darker shades of it.
+        // Pins live in an overlay ABOVE the tint so their colors stay true.
+        MapReader { proxy in
+            Map(position: $position, bounds: zoomedCity == nil ? nil : Self.usBounds)
+                .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
+                .grayscale(1)
+                .contrast(1.1)
+                .colorMultiply(Theme.mapTone)
+                .onMapCameraChange(frequency: .continuous) { context in
+                    cameraContext = context
                 }
-            }
+                .overlay { pinLayer(proxy: proxy) }
         }
-        .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
         .ignoresSafeArea()
         .overlay(alignment: .top) { header }
         .sheet(isPresented: $showList) { peopleList }
@@ -169,6 +171,26 @@ struct ConnectView: View {
     }
 
     // MARK: Person pins
+
+    /// Pins drawn over the tinted map, positioned by converting each
+    /// person's coordinate to screen space; `cameraContext` keeps them
+    /// tracking while the camera moves.
+    @ViewBuilder
+    private func pinLayer(proxy: MapProxy) -> some View {
+        if let city = zoomedCity {
+            let _ = cameraContext
+            ZStack {
+                ForEach(people) { person in
+                    if visibleIDs.contains(person.id),
+                       let point = proxy.convert(person.coordinate(around: city.coordinate), to: .local) {
+                        personPin(person)
+                            .position(point)
+                            .transition(.scale(scale: 0.3).combined(with: .opacity))
+                    }
+                }
+            }
+        }
+    }
 
     private func personPin(_ person: NearbyPerson) -> some View {
         VStack(spacing: 4) {

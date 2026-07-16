@@ -88,6 +88,10 @@ enum Theme {
     /// never behind shadows, glows, or dimming overlays.
     static let brand = Color(red: 22 / 255, green: 86 / 255, blue: 219 / 255)
 
+    /// V2 Connect map tone (#BCC5D1): the map renders grayscale, multiplied
+    /// by this slate so terrain, water, and roads become darker shades of it.
+    static let mapTone = Color(red: 0xBC / 255, green: 0xC5 / 255, blue: 0xD1 / 255)
+
     // MARK: Brand fonts (bundled, registered at launch)
 
     /// Big display moments: celebration titles and other hero text.
