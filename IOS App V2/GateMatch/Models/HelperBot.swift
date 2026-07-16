@@ -39,11 +39,6 @@ enum HelperBot {
             answer: "Open their chat and tap the ••• menu in the top corner. Blocked people disappear from your map and messages; you can unblock them in Account → Settings → Safety.",
             keywords: ["block", "report", "safety", "unblock", "harass"]
         ),
-        FAQ(
-            question: "What is the Friends Map?",
-            answer: "A beta feature — the map button at the bottom right shows your connections pinned to the cities where you met them. Meet-up spots and shared plans are coming later.",
-            keywords: ["map", "friends", "beta", "world", "pins"]
-        ),
     ]
 
     static var greeting: ChatMessage {

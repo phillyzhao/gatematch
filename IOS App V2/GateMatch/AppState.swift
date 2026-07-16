@@ -1,13 +1,6 @@
 import Foundation
 import Observation
 
-/// Where a connection was made — the city pin they appear at on the map.
-struct ConnectionPlace: Equatable {
-    let cityLabel: String
-    let latitude: Double
-    let longitude: Double
-}
-
 /// Single source of truth for the local-only prototype.
 /// No networking — everything lives in memory, seeded from MockData.
 /// V2: discovery is location-based (Connect map), not event-based.
@@ -28,8 +21,6 @@ final class AppState {
     // MARK: Interactions
     var requestedIDs: Set<UUID> = []
     var connections: [Connection] = []
-    /// Where each connection was made, for the friends map.
-    var connectionPlaces: [UUID: ConnectionPlace] = [:]
     /// Chat threads keyed by connection ID.
     var messages: [UUID: [ChatMessage]] = [:]
     var blockedIDs: Set<UUID> = []
@@ -56,9 +47,8 @@ final class AppState {
 
     /// Asks to meet someone. If they already asked too (mock), you're connected.
     @discardableResult
-    func connect(with person: UserProfile, place: ConnectionPlace? = nil) -> Connection? {
+    func connect(with person: UserProfile) -> Connection? {
         requestedIDs.insert(person.id)
-        if let place { connectionPlaces[person.id] = place }
         guard incomingRequests.contains(person.id) else { return nil }
         let connection = Connection(travelerID: person.id)
         connections.append(connection)
@@ -96,15 +86,12 @@ final class AppState {
     }
 
     /// Fully set-up state for SwiftUI previews: onboarded, one connection
-    /// made from the Connect map in Chicago.
+    /// made from the Connect map.
     static var preview: AppState {
         let state = AppState()
         state.currentUser = MockData.previewUser
         if let tessa = MockPeople.profiles.first {
-            state.connect(
-                with: tessa,
-                place: ConnectionPlace(cityLabel: "Chicago, IL", latitude: 41.9, longitude: -87.65)
-            )
+            state.connect(with: tessa)
             state.pendingCelebration = nil
         }
         return state

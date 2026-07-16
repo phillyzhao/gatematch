@@ -1,6 +1,5 @@
 import CoreText
 import SwiftUI
-import TipKit
 
 @main
 struct GateMatchApp: App {
@@ -9,10 +8,6 @@ struct GateMatchApp: App {
     init() {
         Self.registerBundledFonts()
         Self.configureNavigationBarFonts()
-        try? Tips.configure([
-            .displayFrequency(.immediate),
-            .datastoreLocation(.applicationDefault),
-        ])
     }
 
     var body: some Scene {

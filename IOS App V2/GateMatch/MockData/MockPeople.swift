@@ -93,28 +93,41 @@ enum MockPeople {
          "2 mutual friends"),
     ]
 
-    /// Ring of positions around the city center so pins spread out instead
-    /// of stacking; the seeded jitter keeps each city's layout unique.
-    private static let ringOffsets: [(Double, Double)] = [
-        (0.130, 0.050), (-0.070, 0.180), (0.040, -0.190), (-0.160, -0.080),
-        (0.190, -0.110), (-0.130, 0.120), (0.080, 0.210), (-0.030, -0.130),
-    ]
+    /// Varied distances from the city center so pins don't form a neat ring.
+    private static let baseRadii: [Double] = [0.16, 0.11, 0.19, 0.13, 0.21, 0.15, 0.18, 0.10]
 
+    /// Pins are placed by compass bearing. Inland cities use the full
+    /// circle; waterfront cities fan across their land wedge only, so
+    /// nobody floats in a lake or the ocean.
     static func people(near city: USCity) -> [NearbyPerson] {
         // String.hashValue is per-launch randomized; sum scalars for a stable seed.
         let seed = city.id.unicodeScalars.reduce(UInt64(0)) { $0 &* 31 &+ UInt64($1.value) }
         var generator = SplitMix64(seed: seed)
         let count = 6 + Int(generator.next() % 3)
         let picks = pool.shuffled(using: &generator).prefix(count)
+
+        func jitter(_ span: Double) -> Double {
+            (Double(generator.next() % 1000) / 1000 - 0.5) * span
+        }
+
         return picks.enumerated().map { index, pick in
-            let slot = ringOffsets[index % ringOffsets.count]
-            let jitterLat = (Double(generator.next() % 1000) / 1000 - 0.5) * 0.02
-            let jitterLon = (Double(generator.next() % 1000) / 1000 - 0.5) * 0.02
+            let radius = (baseRadii[index % baseRadii.count] + jitter(0.024)) * city.pinScale
+            let bearing: Double
+            if let inland = city.inlandBearing {
+                let fraction = count > 1 ? Double(index) / Double(count - 1) : 0.5
+                bearing = inland - city.wedgeHalfAngle
+                    + fraction * (2 * city.wedgeHalfAngle)
+                    + jitter(12)
+            } else {
+                bearing = Double(index) / Double(count) * 360 + jitter(24)
+            }
+            let radians = bearing * .pi / 180
             return NearbyPerson(
                 profile: pick.profile,
                 relationship: pick.relationship,
-                latitudeOffset: slot.0 + jitterLat,
-                longitudeOffset: slot.1 + jitterLon
+                latitudeOffset: cos(radians) * radius,
+                // Divide by cos(latitude) so the spread looks circular on screen.
+                longitudeOffset: sin(radians) * radius / cos(city.latitude * .pi / 180)
             )
         }
     }

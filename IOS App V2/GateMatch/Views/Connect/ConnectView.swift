@@ -249,16 +249,7 @@ struct ConnectView: View {
     }
 
     private func performConnect(_ person: NearbyPerson) {
-        guard let city = zoomedCity else { return }
-        let coordinate = person.coordinate(around: city.coordinate)
-        appState.connect(
-            with: person.profile,
-            place: ConnectionPlace(
-                cityLabel: city.label,
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude
-            )
-        )
+        appState.connect(with: person.profile)
     }
 
     // MARK: List view
